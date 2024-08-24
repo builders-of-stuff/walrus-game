@@ -39,8 +39,10 @@
   },
   "type": "module",
   "dependencies": {
+    "@builders-of-stuff/svelte-sui-wallet-adapter": "^1.0.0",
     "bits-ui": "^0.21.13",
     "clsx": "^2.1.1",
+    "fabric": "^6.3.0",
     "svelte-radix": "^1.1.1",
     "tailwind-merge": "^2.5.2",
     "tailwind-variants": "^0.2.1"
