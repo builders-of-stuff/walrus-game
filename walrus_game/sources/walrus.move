@@ -4,21 +4,28 @@ use std::string::String;
 use sui::address;
 use sui::display;
 use sui::package;
-use sui::random::{Random, RandomGenerator}; 
+// use sui::random::{Random, RandomGenerator}; 
 // use sui::object_bag::{Self, ObjectBag};
 
 const BASE36: vector<u8> = b"0123456789abcdefghijklmnopqrstuvwxyz";
+
 const VISUALIZATION_SITE: address =
     @0x901fb0569e5054eea1bea1500d1fdfefa8b5cc4def4574c0c99c64b3af24a3ab;
+
+const PENGUIN_PRICE: u64 = 10;
+
+const PENGUIN_FISHING_POWER: u64 = 10;
+
+const EInsufficientFish: u64 = 0;
+const EFishClaimedTooEarly: u64 = 1;
 
 public struct Walrus has key, store {
     id: UID,
     b36_address: String,
-    // equipment: ObjectBag,
-    penguins: vector<u16>,
-    total_fishing_power: u16,
-    fish_last_claimed_at: u16,
-    fish_count: u16,
+    penguins: vector<u64>,
+    total_fishing_power: u64,
+    fish_last_claimed_at: u64,
+    fish_count: u64,
 }
 
 public struct WALRUS has drop {}
@@ -47,10 +54,30 @@ entry fun mint(ctx: &mut TxContext) {
     transfer::transfer(walrus, tx_context::sender(ctx));
 }
 
+entry fun add_penguin(walrus: &mut Walrus, ctx: &mut TxContext) {
+    assert!(walrus.fish_count >= PENGUIN_PRICE, EInsufficientFish);
+
+    walrus.fish_count = walrus.fish_count - PENGUIN_PRICE;
+    walrus.penguins.push_back(1);
+    walrus.total_fishing_power = walrus.total_fishing_power + PENGUIN_FISHING_POWER;
+}
+
+entry fun claim_fish(walrus: &mut Walrus, now: u64, ctx: &mut TxContext) {
+    assert!(now > walrus.fish_last_claimed_at, EFishClaimedTooEarly);
+
+    let time_difference = now - walrus.fish_last_claimed_at;
+    
+    // Assuming 1 fishing power catches 1 fish per minute
+    let new_fish = (time_difference * walrus.total_fishing_power) / 60000; // 60000 ms in a minute
+    
+    walrus.fish_count = walrus.fish_count + new_fish;
+    walrus.fish_last_claimed_at = now;
+}
+
 fun new(ctx: &mut TxContext): Walrus {
     let id = object::new(ctx);
     let b36_address = to_b36(id.uid_to_address());
-    let penguins = vector<u16>[];
+    let penguins = vector<u64>[];
     let total_fishing_power = 0;
     let fish_last_claimed_at = 0;
     let fish_count = 0;
