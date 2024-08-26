@@ -1,0 +1,6 @@
+export const OBJECT_IDS = {
+  WALRUS_GAME_PACKAGE:
+    '0x0b729a2fea82ccde2f4d517b864abfc07dc222f43dcef57436f73a67899b0a4b',
+  UPGRADE_CAP: '0xd3df4c3f148be1601e0e815c0a8c747db3071f61cec940bb91d2c9d4c1b4c244',
+  ADMIN_CAP: ''
+};
