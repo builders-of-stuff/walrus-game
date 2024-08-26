@@ -4,3 +4,6 @@ export const OBJECT_IDS = {
   UPGRADE_CAP: '0xd3df4c3f148be1601e0e815c0a8c747db3071f61cec940bb91d2c9d4c1b4c244',
   ADMIN_CAP: ''
 };
+
+export const CANVAS_BG_WIDTH = 1080;
+export const CANVAS_BG_HEIGHT = 720;

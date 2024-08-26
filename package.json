@@ -21,6 +21,7 @@
     "@sveltejs/vite-plugin-svelte": "^4.0.0-next.6",
     "@tailwindcss/typography": "^0.5.14",
     "@types/eslint": "^9.6.0",
+    "@types/fabric": "^5.3.8",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.1.0",
@@ -43,7 +44,7 @@
     "@mysten/sui": "^1.7.0",
     "bits-ui": "^0.21.13",
     "clsx": "^2.1.1",
-    "fabric": "^6.3.0",
+    "fabric": "5.4.0",
     "svelte-radix": "^1.1.1",
     "tailwind-merge": "^2.5.2",
     "tailwind-variants": "^0.2.1"
