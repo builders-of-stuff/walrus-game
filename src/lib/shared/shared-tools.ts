@@ -123,9 +123,7 @@ export function addInteractiveAreas(imgWidth, imgHeight, fabricCanvas) {
       });
     });
 
-    group.on('mouseup', function () {
-      console.log('up');
-    });
+    group.on('mouseup', function () {});
 
     // Add the image to the canvas
     fabricCanvas.add(group);
@@ -173,9 +171,7 @@ export function addInteractiveAreas(imgWidth, imgHeight, fabricCanvas) {
       });
     });
 
-    group.on('mouseup', function () {
-      console.log('up');
-    });
+    group.on('mouseup', function () {});
 
     // Add the image to the canvas
     fabricCanvas.add(group);

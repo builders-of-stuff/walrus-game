@@ -9,13 +9,22 @@ import { Transaction } from '@mysten/sui/transactions';
 const walletAdapter =
   PUBLIC_NODE_ENV === 'production' ? productionWalletAdapter : testnetWalletAdapter;
 
+/**
+ * Mint walrus
+ */
 export const mintWalrus = async () => {
+  if (!walletAdapter?.currentAccount?.address) {
+    return;
+  }
+
   const tx = new Transaction();
 
-  tx.moveCall({
+  const [walrus] = tx.moveCall({
     target: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::mint`,
     arguments: []
   });
+
+  tx.transferObjects([walrus], walletAdapter?.currentAccount?.address);
 
   try {
     const { bytes, signature } = await walletAdapter.signTransaction(tx as any, {});
@@ -25,13 +34,16 @@ export const mintWalrus = async () => {
       signature
     });
 
-    console.log(executedTx);
+    return executedTx;
   } catch (e) {
     console.log(e);
   }
 };
 
-export const fish = async (walrusObjectId: string) => {
+/**
+ * Claims fish from walrus clicking
+ */
+export const claimWalrusFish = async (walrusObjectId: string) => {
   const tx = new Transaction();
 
   tx.moveCall({
@@ -49,6 +61,38 @@ export const fish = async (walrusObjectId: string) => {
     const executedTx = await walletAdapter.suiClient.executeTransactionBlock({
       transactionBlock: bytes,
       signature: signature,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+        showInput: true,
+        showRawInput: true
+      }
+    });
+
+    console.log('executedTx: ', executedTx);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+/**
+ * Buy penguin
+ */
+export const buyPenguin = async (walrusObjectId: string) => {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::add_penguin`,
+    arguments: [tx.object(`${walrusObjectId}`)]
+  });
+
+  try {
+    const { bytes, signature } = await walletAdapter.signTransaction(tx as any, {});
+
+    const executedTx = await walletAdapter.suiClient.executeTransactionBlock({
+      transactionBlock: bytes,
+      signature,
       options: {
         showEffects: true,
         showEvents: true,

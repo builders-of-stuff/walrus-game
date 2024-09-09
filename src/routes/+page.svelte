@@ -5,7 +5,7 @@
     testnetWalletAdapter,
     walletAdapter as productionWalletAdapter
   } from '@builders-of-stuff/svelte-sui-wallet-adapter';
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
 
   import { PUBLIC_NODE_ENV } from '$env/static/public';
   import { Transaction } from '@mysten/sui/transactions';
@@ -16,10 +16,20 @@
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    updateCanvasSize
+    updateCanvasSize,
+    getObjectId
   } from '$lib/shared/shared-tools';
-  import { fish, mintWalrus } from '$lib/sdk/sdk';
+  import { buyPenguin, claimWalrusFish, mintWalrus } from '$lib/sdk/sdk';
   import Ice from '$lib/assets/ice-1080x720.png';
+
+  /**
+   * - Fetch/Mint walrus
+   * - Store ObjectId
+   * - Fetch walrus data
+   * - render walrus fabric
+   * - render walrus-related UI
+   *
+   */
 
   const walletAdapter =
     PUBLIC_NODE_ENV === 'production' ? productionWalletAdapter : testnetWalletAdapter;
@@ -30,6 +40,36 @@
   let canvas;
   let fabricCanvas;
   let containerDiv;
+
+  let hasCheckedOwnedObjects = $state(false);
+
+  let walrus = $state(null as any);
+
+  const penguins = $derived(walrus?.penguins || []);
+  const fishLastClaimedAt = $derived(walrus?.fishLastClaimedAt || 0);
+
+  const handleMintWalrus = async () => {
+    const mintResponse = (await mintWalrus()) as any;
+
+    const walrusId = mintResponse?.objectChanges?.find?.((obj) => {
+      return (
+        obj?.objectType === `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::Walrus`
+      );
+    });
+
+    const walrusObject = (await walletAdapter.suiClient.getObject({
+      id: walrusId,
+      options: {
+        showContent: true,
+        showDisplay: true,
+        showOwner: true,
+        showType: true,
+        showStorageRebate: true
+      }
+    })) as any;
+
+    walrus = walrusObject?.data?.content?.fields;
+  };
 
   /**
    * Mount canvas
@@ -97,14 +137,61 @@
       );
     };
   });
+
+  /**
+   * Fetch existing walrus upon connect
+   */
+  $effect(() => {
+    if (!walletAdapter.isConnected || !!walrus?.id || hasCheckedOwnedObjects) {
+      return;
+    }
+
+    untrack(() => {
+      (async () => {
+        const ownedObjects = await walletAdapter.suiClient.getOwnedObjects({
+          owner: walletAdapter?.currentAccount?.address as any,
+          filter: {
+            StructType: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::Walrus`
+          },
+          options: {
+            showContent: true,
+            showDisplay: true,
+            showOwner: true,
+            showType: true,
+            showStorageRebate: true
+          }
+        });
+
+        const walrusId = ownedObjects?.data?.[0]?.data?.objectId;
+        hasCheckedOwnedObjects = true;
+
+        if (!walrusId) {
+          return;
+        }
+
+        const object = (await walletAdapter.suiClient.getObject({
+          id: walrusId,
+          options: {
+            showContent: true,
+            showDisplay: true,
+            showOwner: true,
+            showType: true,
+            showStorageRebate: true
+          }
+        })) as any;
+
+        walrus = object?.data?.content?.fields;
+      })();
+    });
+  });
 </script>
 
 <ConnectButton {walletAdapter} />
 
-<Button onclick={mintWalrus}>Mint walrus</Button>
-<Button onclick={() => fish(walrusObjectId)}>Fish</Button>
-<Button>Claim fish</Button>
-<Button>Add penguin</Button>
+<Button onclick={handleMintWalrus}>Mint walrus</Button>
+<Button onclick={() => claimWalrusFish(walrusObjectId)}>Claim walrus fish</Button>
+<Button onclick={() => buyPenguin(walrusObjectId)}>Buy penguin</Button>
+<Button>Claim penguin fish</Button>
 
 <div bind:this={containerDiv} class="canvas-container relative">
   <canvas bind:this={canvas}></canvas>

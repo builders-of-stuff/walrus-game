@@ -48,10 +48,11 @@ public struct WALRUS has drop {}
 //     transfer::public_transfer(display, ctx.sender());
 // }
 
-entry fun mint(ctx: &mut TxContext) {
+public fun mint(ctx: &mut TxContext): Walrus {
     let walrus = new(ctx);
 
-    transfer::transfer(walrus, tx_context::sender(ctx));
+    // transfer::transfer(walrus, tx_context::sender(ctx));
+    walrus
 }
 
 entry fun add_penguin(walrus: &mut Walrus, ctx: &mut TxContext) {
@@ -74,10 +75,12 @@ entry fun claim_penguin_fish(walrus: &mut Walrus, now: u64, ctx: &mut TxContext)
     walrus.fish_last_claimed_at = now;
 }
 
+public fun get_penguin_count(walrus: &Walrus): u64 {
+    vector::length(&walrus.penguins)
+}
+
 entry fun claim_fish(walrus: &mut Walrus, fish_count: u64, now: u64, ctx: &mut TxContext) {
     walrus.fish_count = walrus.fish_count + fish_count;
-    walrus.fish_last_claimed_at = now;
-
 }
 
 fun new(ctx: &mut TxContext): Walrus {
