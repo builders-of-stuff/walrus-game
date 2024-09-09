@@ -5,21 +5,22 @@
     testnetWalletAdapter,
     walletAdapter as productionWalletAdapter
   } from '@builders-of-stuff/svelte-sui-wallet-adapter';
-  import { onMount, untrack } from 'svelte';
+  import { onMount, tick, untrack } from 'svelte';
 
   import { PUBLIC_NODE_ENV } from '$env/static/public';
   import { Transaction } from '@mysten/sui/transactions';
 
   import { Button } from '$lib/components/ui/button';
   import {
-    addInteractiveAreas,
+    paintPenguin,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
     updateCanvasSize,
-    getObjectId
+    getObjectId,
+    paintWalrus
   } from '$lib/shared/shared-tools';
-  import { buyPenguin, claimWalrusFish, mintWalrus } from '$lib/sdk/sdk';
+  import { buyPenguin, claimWalrusFish, mintWalrus, burnWalrus } from '$lib/sdk/sdk';
   import Ice from '$lib/assets/ice-1080x720.png';
 
   /**
@@ -40,6 +41,7 @@
   let canvas;
   let fabricCanvas;
   let containerDiv;
+  let imgWidth, imgHeight;
 
   let hasCheckedOwnedObjects = $state(false);
 
@@ -53,9 +55,12 @@
 
     const walrusId = mintResponse?.objectChanges?.find?.((obj) => {
       return (
-        obj?.objectType === `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::Walrus`
+        obj?.objectType === `${getObjectId('OG_WALRUS_GAME_PACKAGE')}::walrus::Walrus`
       );
-    });
+    })?.objectId;
+
+    // wait 2 seconds b/c notFound error (syncing?)
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     const walrusObject = (await walletAdapter.suiClient.getObject({
       id: walrusId,
@@ -69,14 +74,22 @@
     })) as any;
 
     walrus = walrusObject?.data?.content?.fields;
+
+    if (walrus) {
+      paintWalrus(imgWidth, imgHeight, fabricCanvas);
+    }
+  };
+
+  const handleBurnWalrus = async () => {
+    const burnResponse = (await burnWalrus(walrus.id?.id)) as any;
+
+    console.log('burnResponse: ', burnResponse);
   };
 
   /**
    * Mount canvas
    */
   onMount(() => {
-    let imgWidth, imgHeight;
-
     fabricCanvas = new fabric.Canvas(canvas, {
       width: window.innerWidth,
       height: window.innerHeight,
@@ -113,7 +126,6 @@
         (fabricCanvas.height - img.height * scaleFactor) / 2;
 
       fabricCanvas.renderAll();
-      addInteractiveAreas(imgWidth, imgHeight, fabricCanvas);
     });
 
     /**
@@ -151,7 +163,7 @@
         const ownedObjects = await walletAdapter.suiClient.getOwnedObjects({
           owner: walletAdapter?.currentAccount?.address as any,
           filter: {
-            StructType: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::Walrus`
+            StructType: `${getObjectId('OG_WALRUS_GAME_PACKAGE')}::walrus::Walrus`
           },
           options: {
             showContent: true,
@@ -181,6 +193,8 @@
         })) as any;
 
         walrus = object?.data?.content?.fields;
+
+        paintWalrus(imgWidth, imgHeight, fabricCanvas);
       })();
     });
   });
@@ -192,6 +206,7 @@
 <Button onclick={() => claimWalrusFish(walrusObjectId)}>Claim walrus fish</Button>
 <Button onclick={() => buyPenguin(walrusObjectId)}>Buy penguin</Button>
 <Button>Claim penguin fish</Button>
+<Button onclick={handleBurnWalrus}>Burn walrus</Button>
 
 <div bind:this={containerDiv} class="canvas-container relative">
   <canvas bind:this={canvas}></canvas>

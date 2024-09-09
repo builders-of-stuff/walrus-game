@@ -83,6 +83,19 @@ entry fun claim_fish(walrus: &mut Walrus, fish_count: u64, now: u64, ctx: &mut T
     walrus.fish_count = walrus.fish_count + fish_count;
 }
 
+public fun burn_walrus(walrus: Walrus, ctx: &mut TxContext) {
+    let Walrus {
+        id, 
+        b36_address: _,
+        penguins: _,
+        total_fishing_power: _,
+        fish_last_claimed_at: _,
+        fish_count: _,
+    } = walrus;
+
+    object::delete(id);
+}
+
 fun new(ctx: &mut TxContext): Walrus {
     let id = object::new(ctx);
     let b36_address = to_b36(id.uid_to_address());

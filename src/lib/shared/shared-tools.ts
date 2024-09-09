@@ -79,13 +79,7 @@ export function moveCanvas(x, y, fabricCanvas, imgWidth, imgHeight) {
   });
 }
 
-/**
- * Interactive areas
- */
-export function addInteractiveAreas(imgWidth, imgHeight, fabricCanvas) {
-  /**
-   * Walrus
-   */
+export function paintWalrus(imgWidth, imgHeight, fabricCanvas) {
   const walrusPosition = calculateRelativePosition(100, 200, imgWidth, imgHeight);
 
   fabric.Image.fromURL(Walrus, (img) => {
@@ -130,7 +124,12 @@ export function addInteractiveAreas(imgWidth, imgHeight, fabricCanvas) {
     group.bringToFront();
     fabricCanvas.renderAll();
   });
+}
 
+/**
+ * Interactive areas
+ */
+export function paintPenguin(imgWidth, imgHeight, fabricCanvas) {
   /**
    * Penguin
    */
