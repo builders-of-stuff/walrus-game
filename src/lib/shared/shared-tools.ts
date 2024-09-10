@@ -2,6 +2,7 @@ import { fabric } from 'fabric';
 
 import Walrus from '$lib/assets/walrus-250.png';
 import Penguin from '$lib/assets/penguin-150.png';
+import Fish from '$lib/assets/fish-32.png';
 
 import { OBJECT_IDS, CANVAS_BG_HEIGHT, CANVAS_BG_WIDTH } from './shared.constant';
 
@@ -100,9 +101,11 @@ export function paintWalrus(imgWidth, imgHeight, fabricCanvas) {
       hoverCursor: 'pointer'
     }) as any;
 
+    const originalTop = group.top;
+
     // Add hover effect
     group.on('mousedown', () => {
-      group.animate('top', group?.top - 10, {
+      group.animate('top', originalTop - 10, {
         duration: 200,
         onChange: fabricCanvas.renderAll.bind(fabricCanvas),
         easing: fabric.util.ease.easeOutCubic
@@ -110,11 +113,13 @@ export function paintWalrus(imgWidth, imgHeight, fabricCanvas) {
     });
 
     group.on('mouseup', () => {
-      group.animate('top', group?.top + 10, {
+      group.animate('top', originalTop, {
         duration: 200,
         onChange: fabricCanvas.renderAll.bind(fabricCanvas),
         easing: fabric.util.ease.easeOutCubic
       });
+
+      addFishImage(fabricCanvas, group.left + group.width / 2, group.top);
     });
 
     group.on('mouseup', function () {});
@@ -123,6 +128,46 @@ export function paintWalrus(imgWidth, imgHeight, fabricCanvas) {
     fabricCanvas.add(group);
     group.bringToFront();
     fabricCanvas.renderAll();
+  });
+}
+
+function addFishImage(canvas, x, y) {
+  fabric.Image.fromURL(Fish, (img) => {
+    img.set({
+      left: x,
+      top: y,
+      originX: 'center',
+      originY: 'center',
+      scaleX: 2,
+      scaleY: 2,
+      selectable: false,
+      evented: false,
+      opacity: 1
+    });
+
+    canvas.add(img);
+    img.bringToFront();
+
+    // Animate the fish image
+    const animateFish = () => {
+      img.animate(
+        {
+          top: img?.top - 50,
+          opacity: 0
+        },
+        {
+          duration: 1000,
+          onChange: canvas.renderAll.bind(canvas),
+          onComplete: () => {
+            canvas.remove(img);
+            canvas.renderAll();
+          }
+        }
+      );
+    };
+
+    // Start the animation after a short delay
+    setTimeout(animateFish, 20);
   });
 }
 

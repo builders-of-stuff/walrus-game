@@ -24,11 +24,11 @@
   import Ice from '$lib/assets/ice-1080x720.png';
 
   /**
-   * - Fetch/Mint walrus
-   * - Store ObjectId
-   * - Fetch walrus data
-   * - render walrus fabric
-   * - render walrus-related UI
+   * - Walrus fishing label
+   * - fishing localStorage integration
+   * - Navbar update
+   *   - Fish count
+   *  - Claim fish integration
    *
    */
 
