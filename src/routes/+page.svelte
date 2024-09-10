@@ -11,6 +11,8 @@
   import { Transaction } from '@mysten/sui/transactions';
 
   import { Button } from '$lib/components/ui/button';
+  import { Badge } from '$lib/components/ui/badge';
+
   import {
     paintPenguin,
     handleMouseDown,
@@ -22,12 +24,10 @@
   } from '$lib/shared/shared-tools';
   import { buyPenguin, claimWalrusFish, mintWalrus, burnWalrus } from '$lib/sdk/sdk';
   import Ice from '$lib/assets/ice-1080x720.png';
+  import RawFish from '$lib/assets/fish-32.png';
+  import Fish from '$lib/assets/cooked-fish-32.png';
 
   /**
-   * - Walrus fishing label
-   * - fishing localStorage integration
-   * - Navbar update
-   *   - Fish count
    *  - Claim fish integration
    *
    */
@@ -46,6 +46,8 @@
   let hasCheckedOwnedObjects = $state(false);
 
   let walrus = $state(null as any);
+  let fishCount = $state(0);
+  let rawFishCount = $state(0);
 
   const penguins = $derived(walrus?.penguins || []);
   const fishLastClaimedAt = $derived(walrus?.fishLastClaimedAt || 0);
@@ -76,7 +78,7 @@
     walrus = walrusObject?.data?.content?.fields;
 
     if (walrus) {
-      paintWalrus(imgWidth, imgHeight, fabricCanvas);
+      paintWalrus(imgWidth, imgHeight, fabricCanvas, handleWalrusClick);
     }
   };
 
@@ -86,10 +88,16 @@
     console.log('burnResponse: ', burnResponse);
   };
 
-  /**
-   * Mount canvas
-   */
+  function handleWalrusClick() {
+    rawFishCount += 1;
+  }
+
   onMount(() => {
+    rawFishCount = Number(localStorage.getItem('fishCount')) || 0;
+
+    /**
+     * Mount canvas
+     */
     fabricCanvas = new fabric.Canvas(canvas, {
       width: window.innerWidth,
       height: window.innerHeight,
@@ -151,6 +159,13 @@
   });
 
   /**
+   * Sync rawFishCount with localStorage
+   */
+  $effect(() => {
+    localStorage.setItem('fishCount', rawFishCount.toString());
+  });
+
+  /**
    * Fetch existing walrus upon connect
    */
   $effect(() => {
@@ -193,20 +208,33 @@
         })) as any;
 
         walrus = object?.data?.content?.fields;
+        fishCount = Number(walrus?.fish_count);
 
-        paintWalrus(imgWidth, imgHeight, fabricCanvas);
+        paintWalrus(imgWidth, imgHeight, fabricCanvas, handleWalrusClick);
       })();
     });
   });
 </script>
 
-<ConnectButton {walletAdapter} />
+<div class="mx-2 my-2 flex justify-between">
+  <div>
+    <Button onclick={handleMintWalrus}>Mint walrus</Button>
+    <Button onclick={() => claimWalrusFish(walrusObjectId)}>Claim walrus fish</Button>
+    <Button onclick={() => buyPenguin(walrusObjectId)}>Buy penguin</Button>
+    <Button>Claim penguin fish</Button>
+    <!-- <Button onclick={handleBurnWalrus}>Burn walrus</Button> -->
+  </div>
 
-<Button onclick={handleMintWalrus}>Mint walrus</Button>
-<Button onclick={() => claimWalrusFish(walrusObjectId)}>Claim walrus fish</Button>
-<Button onclick={() => buyPenguin(walrusObjectId)}>Buy penguin</Button>
-<Button>Claim penguin fish</Button>
-<Button onclick={handleBurnWalrus}>Burn walrus</Button>
+  <div class="flex gap-1">
+    <Badge variant="secondary" class="flex items-center gap-1">
+      {fishCount} <img src={Fish} alt="Fish" class="h-8 w-8" />
+    </Badge>
+    <Badge variant="secondary" class="flex items-center gap-1">
+      {rawFishCount} <img src={RawFish} alt="Fish" class="h-8 w-8" />
+    </Badge>
+    <ConnectButton {walletAdapter} />
+  </div>
+</div>
 
 <div bind:this={containerDiv} class="canvas-container relative">
   <canvas bind:this={canvas}></canvas>

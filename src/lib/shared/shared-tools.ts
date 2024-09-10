@@ -80,7 +80,7 @@ export function moveCanvas(x, y, fabricCanvas, imgWidth, imgHeight) {
   });
 }
 
-export function paintWalrus(imgWidth, imgHeight, fabricCanvas) {
+export function paintWalrus(imgWidth, imgHeight, fabricCanvas, clickCallback) {
   const walrusPosition = calculateRelativePosition(100, 200, imgWidth, imgHeight);
 
   fabric.Image.fromURL(Walrus, (img) => {
@@ -119,6 +119,8 @@ export function paintWalrus(imgWidth, imgHeight, fabricCanvas) {
         easing: fabric.util.ease.easeOutCubic
       });
 
+      clickCallback();
+
       addFishImage(fabricCanvas, group.left + group.width / 2, group.top);
     });
 
@@ -132,7 +134,7 @@ export function paintWalrus(imgWidth, imgHeight, fabricCanvas) {
 }
 
 function addFishImage(canvas, x, y) {
-  fabric.Image.fromURL(Fish, (img) => {
+  fabric.Image.fromURL(Fish, (img: any) => {
     img.set({
       left: x,
       top: y,
@@ -172,7 +174,7 @@ function addFishImage(canvas, x, y) {
 }
 
 /**
- * Interactive areas
+ * Penguin
  */
 export function paintPenguin(imgWidth, imgHeight, fabricCanvas) {
   /**
