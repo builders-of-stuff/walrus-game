@@ -12,6 +12,7 @@
 
   import { Button } from '$lib/components/ui/button';
   import { Badge } from '$lib/components/ui/badge';
+  import * as Dialog from '$lib/components/ui/dialog';
 
   import {
     paintPenguin,
@@ -20,23 +21,25 @@
     handleMouseUp,
     updateCanvasSize,
     getObjectId,
-    paintWalrus
+    paintWalrus,
+    paintFire
   } from '$lib/shared/shared-tools';
-  import { buyPenguin, claimWalrusFish, mintWalrus, burnWalrus } from '$lib/sdk/sdk';
+  import { claimWalrusFish, mintWalrus, burnWalrus, buyPenguins } from '$lib/sdk/sdk';
+
   import Ice from '$lib/assets/ice-1080x720.png';
   import RawFish from '$lib/assets/fish-32.png';
   import Fish from '$lib/assets/cooked-fish-32.png';
 
   /**
    *  - Claim fish integration
+   * - Buy penguin integration
+   *  - penguin UI integration
+   * - penguin staking calculations
    *
    */
 
   const walletAdapter =
     PUBLIC_NODE_ENV === 'production' ? productionWalletAdapter : testnetWalletAdapter;
-
-  const walrusObjectId =
-    '0x7331fcc8beda6ad4509ea2a6c70c24e6b7d23945084533fb353aab5fd83a5b6a';
 
   let canvas;
   let fabricCanvas;
@@ -52,17 +55,31 @@
   const penguins = $derived(walrus?.penguins || []);
   const fishLastClaimedAt = $derived(walrus?.fishLastClaimedAt || 0);
 
+  $effect(() => {
+    console.log('walrus: ', $state.snapshot(walrus));
+  });
+
+  const handleClaimWalrusFish = async () => {
+    await claimWalrusFish(walrus.id?.id, () => {
+      fishCount += rawFishCount;
+      rawFishCount -= rawFishCount;
+    });
+  };
+
   const handleMintWalrus = async () => {
     const mintResponse = (await mintWalrus()) as any;
 
     const walrusId = mintResponse?.objectChanges?.find?.((obj) => {
       return (
-        obj?.objectType === `${getObjectId('OG_WALRUS_GAME_PACKAGE')}::walrus::Walrus`
+        obj?.objectType === `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::Walrus`
       );
     })?.objectId;
 
     // wait 2 seconds b/c notFound error (syncing?)
     await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Works but incredibly slow, even more than the manual setTimeout
+    // await walletAdapter?.suiClient.waitForTransaction({ digest: mintResponse.digest });
 
     const walrusObject = (await walletAdapter.suiClient.getObject({
       id: walrusId,
@@ -79,6 +96,7 @@
 
     if (walrus) {
       paintWalrus(imgWidth, imgHeight, fabricCanvas, handleWalrusClick);
+      paintFire(imgWidth, imgHeight, fabricCanvas, handleClaimWalrusFish);
     }
   };
 
@@ -178,7 +196,7 @@
         const ownedObjects = await walletAdapter.suiClient.getOwnedObjects({
           owner: walletAdapter?.currentAccount?.address as any,
           filter: {
-            StructType: `${getObjectId('OG_WALRUS_GAME_PACKAGE')}::walrus::Walrus`
+            StructType: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::Walrus`
           },
           options: {
             showContent: true,
@@ -191,6 +209,8 @@
 
         const walrusId = ownedObjects?.data?.[0]?.data?.objectId;
         hasCheckedOwnedObjects = true;
+
+        console.log('ownedObjects: ', ownedObjects);
 
         if (!walrusId) {
           return;
@@ -211,6 +231,7 @@
         fishCount = Number(walrus?.fish_count);
 
         paintWalrus(imgWidth, imgHeight, fabricCanvas, handleWalrusClick);
+        paintFire(imgWidth, imgHeight, fabricCanvas, handleClaimWalrusFish);
       })();
     });
   });
@@ -218,11 +239,23 @@
 
 <div class="mx-2 my-2 flex justify-between">
   <div>
-    <Button onclick={handleMintWalrus}>Mint walrus</Button>
-    <Button onclick={() => claimWalrusFish(walrusObjectId)}>Claim walrus fish</Button>
-    <Button onclick={() => buyPenguin(walrusObjectId)}>Buy penguin</Button>
+    <Dialog.Root>
+      <Dialog.Trigger>
+        <Button>Shop</Button>
+      </Dialog.Trigger>
+      <Dialog.Content>
+        <Dialog.Header>
+          <Dialog.Title>The Walrus Shop</Dialog.Title>
+
+          <Button onclick={handleMintWalrus}>Mint walrus</Button>
+          <Button onclick={() => buyPenguins(walrus.id?.id, 1)}>Buy penguin</Button>
+        </Dialog.Header>
+      </Dialog.Content>
+    </Dialog.Root>
+
+    <Button onclick={handleClaimWalrusFish}>Claim walrus fish</Button>
     <Button>Claim penguin fish</Button>
-    <!-- <Button onclick={handleBurnWalrus}>Burn walrus</Button> -->
+    <Button onclick={handleBurnWalrus}>Burn walrus</Button>
   </div>
 
   <div class="flex gap-1">

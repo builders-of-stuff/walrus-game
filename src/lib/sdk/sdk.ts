@@ -44,7 +44,6 @@ export const mintWalrus = async () => {
  * Burn walrus
  */
 export const burnWalrus = async (walrusObjectId: string) => {
-  console.log('walrusObjectId: ', walrusObjectId);
   const tx = new Transaction();
 
   tx.moveCall({
@@ -77,16 +76,14 @@ export const burnWalrus = async (walrusObjectId: string) => {
 /**
  * Claims fish from walrus clicking
  */
-export const claimWalrusFish = async (walrusObjectId: string) => {
+export const claimWalrusFish = async (walrusObjectId: string, cb: any) => {
+  console.log('walrusObjectId: ', walrusObjectId);
+  const rawFishCount = Number(localStorage.getItem('fishCount')) || 0;
   const tx = new Transaction();
 
   tx.moveCall({
     target: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::claim_fish`,
-    arguments: [
-      tx.object(`${walrusObjectId}`),
-      tx.pure.u64(10),
-      tx.pure.u64(Date.now())
-    ]
+    arguments: [tx.object(`${walrusObjectId}`), tx.pure.u64(rawFishCount)]
   });
 
   try {
@@ -104,6 +101,8 @@ export const claimWalrusFish = async (walrusObjectId: string) => {
       }
     });
 
+    cb();
+
     console.log('executedTx: ', executedTx);
   } catch (e) {
     console.log(e);
@@ -113,12 +112,12 @@ export const claimWalrusFish = async (walrusObjectId: string) => {
 /**
  * Buy penguin
  */
-export const buyPenguin = async (walrusObjectId: string) => {
+export const buyPenguins = async (walrusObjectId: string, penguinQuantity: number) => {
   const tx = new Transaction();
 
   tx.moveCall({
-    target: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::add_penguin`,
-    arguments: [tx.object(`${walrusObjectId}`)]
+    target: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::buy_penguins`,
+    arguments: [tx.object(`${walrusObjectId}`), tx.pure.u64(penguinQuantity)]
   });
 
   try {

@@ -12,7 +12,7 @@ const BASE36: vector<u8> = b"0123456789abcdefghijklmnopqrstuvwxyz";
 const VISUALIZATION_SITE: address =
     @0x901fb0569e5054eea1bea1500d1fdfefa8b5cc4def4574c0c99c64b3af24a3ab;
 
-const PENGUIN_PRICE: u64 = 10;
+const PENGUIN_PRICE: u64 = 100;
 
 const PENGUIN_FISHING_POWER: u64 = 10;
 
@@ -22,7 +22,7 @@ const EFishClaimedTooEarly: u64 = 1;
 public struct Walrus has key, store {
     id: UID,
     b36_address: String,
-    penguins: vector<u64>,
+    penguins: u64, 
     total_fishing_power: u64,
     fish_last_claimed_at: u64,
     fish_count: u64,
@@ -55,12 +55,12 @@ public fun mint(ctx: &mut TxContext): Walrus {
     walrus
 }
 
-entry fun add_penguin(walrus: &mut Walrus, ctx: &mut TxContext) {
-    assert!(walrus.fish_count >= PENGUIN_PRICE, EInsufficientFish);
+entry fun buy_penguins(walrus: &mut Walrus, penguin_quantity: u64, ctx: &mut TxContext) {
+    assert!(walrus.fish_count >= penguin_quantity * PENGUIN_PRICE, EInsufficientFish);
 
-    walrus.fish_count = walrus.fish_count - PENGUIN_PRICE;
-    walrus.penguins.push_back(1);
-    walrus.total_fishing_power = walrus.total_fishing_power + PENGUIN_FISHING_POWER;
+    walrus.fish_count = walrus.fish_count - penguin_quantity * PENGUIN_PRICE;
+    walrus.penguins = walrus.penguins + penguin_quantity;
+    walrus.total_fishing_power = walrus.total_fishing_power + penguin_quantity * PENGUIN_FISHING_POWER;
 }
 
 entry fun claim_penguin_fish(walrus: &mut Walrus, now: u64, ctx: &mut TxContext) {
@@ -75,11 +75,7 @@ entry fun claim_penguin_fish(walrus: &mut Walrus, now: u64, ctx: &mut TxContext)
     walrus.fish_last_claimed_at = now;
 }
 
-public fun get_penguin_count(walrus: &Walrus): u64 {
-    vector::length(&walrus.penguins)
-}
-
-entry fun claim_fish(walrus: &mut Walrus, fish_count: u64, now: u64, ctx: &mut TxContext) {
+entry fun claim_fish(walrus: &mut Walrus, fish_count: u64, _ctx: &mut TxContext) {
     walrus.fish_count = walrus.fish_count + fish_count;
 }
 
@@ -99,7 +95,7 @@ public fun burn_walrus(walrus: Walrus, ctx: &mut TxContext) {
 fun new(ctx: &mut TxContext): Walrus {
     let id = object::new(ctx);
     let b36_address = to_b36(id.uid_to_address());
-    let penguins = vector<u64>[];
+    let penguins = 0;
     let total_fishing_power = 0;
     let fish_last_claimed_at = 0;
     let fish_count = 0;

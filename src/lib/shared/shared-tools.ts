@@ -3,6 +3,7 @@ import { fabric } from 'fabric';
 import Walrus from '$lib/assets/walrus-250.png';
 import Penguin from '$lib/assets/penguin-150.png';
 import Fish from '$lib/assets/fish-32.png';
+import Fire from '$lib/assets/fire-40.png';
 
 import { OBJECT_IDS, CANVAS_BG_HEIGHT, CANVAS_BG_WIDTH } from './shared.constant';
 
@@ -125,6 +126,55 @@ export function paintWalrus(imgWidth, imgHeight, fabricCanvas, clickCallback) {
     });
 
     group.on('mouseup', function () {});
+
+    // Add the image to the canvas
+    fabricCanvas.add(group);
+    group.bringToFront();
+    fabricCanvas.renderAll();
+  });
+}
+
+export function paintFire(imgWidth, imgHeight, fabricCanvas, clickCallback) {
+  const firePosition = calculateRelativePosition(230, 240, imgWidth, imgHeight);
+
+  fabric.Image.fromURL(Fire, (img) => {
+    // Set image properties
+    img.set({
+      left: firePosition.left,
+      top: firePosition.top,
+      scaleX: (1.5 * imgWidth) / CANVAS_BG_WIDTH,
+      scaleY: (1.5 * imgHeight) / CANVAS_BG_HEIGHT,
+      selectable: false,
+      evented: true,
+      hoverCursor: 'pointer'
+    });
+
+    const group = new fabric.Group([img], {
+      selectable: false,
+      evented: true,
+      hoverCursor: 'pointer'
+    }) as any;
+
+    const originalTop = group.top;
+
+    // Add hover effect
+    group.on('mousedown', () => {
+      // group.animate('top', originalTop - 10, {
+      //   duration: 200,
+      //   onChange: fabricCanvas.renderAll.bind(fabricCanvas),
+      //   easing: fabric.util.ease.easeOutCubic
+      // });
+    });
+
+    group.on('mouseup', () => {
+      // group.animate('top', originalTop, {
+      //   duration: 200,
+      //   onChange: fabricCanvas.renderAll.bind(fabricCanvas),
+      //   easing: fabric.util.ease.easeOutCubic
+      // });
+
+      clickCallback();
+    });
 
     // Add the image to the canvas
     fabricCanvas.add(group);
