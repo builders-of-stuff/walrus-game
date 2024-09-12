@@ -13,6 +13,7 @@
   import { Button } from '$lib/components/ui/button';
   import { Badge } from '$lib/components/ui/badge';
   import * as Dialog from '$lib/components/ui/dialog';
+  import * as HoverCard from '$lib/components/ui/hover-card';
 
   import {
     paintPenguin,
@@ -29,9 +30,9 @@
   import Ice from '$lib/assets/ice-1080x720.png';
   import RawFish from '$lib/assets/fish-32.png';
   import Fish from '$lib/assets/cooked-fish-32.png';
+  import Penguin from '$lib/assets/penguin-150.png';
 
   /**
-   *  - Claim fish integration
    * - Buy penguin integration
    *  - penguin UI integration
    * - penguin staking calculations
@@ -52,12 +53,18 @@
   let fishCount = $state(0);
   let rawFishCount = $state(0);
 
-  const penguins = $derived(walrus?.penguins || []);
+  const penguins = $derived(Number(walrus?.penguins) || 0);
   const fishLastClaimedAt = $derived(walrus?.fishLastClaimedAt || 0);
 
   $effect(() => {
     console.log('walrus: ', $state.snapshot(walrus));
   });
+
+  const handleBuyPenguins = async (buyQuantity: number = 1) => {
+    await buyPenguins(walrus.id?.id, buyQuantity).then(() => {
+      walrus.penguins = Number(walrus?.penguins) + buyQuantity;
+    });
+  };
 
   const handleClaimWalrusFish = async () => {
     await claimWalrusFish(walrus.id?.id, () => {
@@ -110,6 +117,9 @@
     rawFishCount += 1;
   }
 
+  /**
+   * ===========================================================================================================================
+   */
   onMount(() => {
     rawFishCount = Number(localStorage.getItem('fishCount')) || 0;
 
@@ -210,8 +220,6 @@
         const walrusId = ownedObjects?.data?.[0]?.data?.objectId;
         hasCheckedOwnedObjects = true;
 
-        console.log('ownedObjects: ', ownedObjects);
-
         if (!walrusId) {
           return;
         }
@@ -238,7 +246,7 @@
 </script>
 
 <div class="mx-2 my-2 flex justify-between">
-  <div>
+  <div class="flex gap-1">
     <Dialog.Root>
       <Dialog.Trigger>
         <Button>Shop</Button>
@@ -253,18 +261,39 @@
       </Dialog.Content>
     </Dialog.Root>
 
+    <HoverCard.Root openDelay={200}>
+      <HoverCard.Trigger>
+        <Badge variant="secondary" class="flex items-center gap-1">
+          {penguins} <img src={Penguin} alt="Fish" class="h-8 w-8" />
+        </Badge>
+      </HoverCard.Trigger>
+      <HoverCard.Content>Penguins</HoverCard.Content>
+    </HoverCard.Root>
+
+    <HoverCard.Root openDelay={200}>
+      <HoverCard.Trigger>
+        <Badge variant="secondary" class="flex items-center gap-1">
+          {rawFishCount} <img src={RawFish} alt="Fish" class="h-8 w-8" />
+        </Badge>
+      </HoverCard.Trigger>
+      <HoverCard.Content>Raw fish</HoverCard.Content>
+    </HoverCard.Root>
+
+    <HoverCard.Root openDelay={200}>
+      <HoverCard.Trigger>
+        <Badge variant="secondary" class="flex items-center gap-1">
+          {fishCount} <img src={Fish} alt="Fish" class="h-8 w-8" />
+        </Badge>
+      </HoverCard.Trigger>
+      <HoverCard.Content>Cooked fish</HoverCard.Content>
+    </HoverCard.Root>
+
     <Button onclick={handleClaimWalrusFish}>Claim walrus fish</Button>
     <Button>Claim penguin fish</Button>
     <Button onclick={handleBurnWalrus}>Burn walrus</Button>
   </div>
 
   <div class="flex gap-1">
-    <Badge variant="secondary" class="flex items-center gap-1">
-      {fishCount} <img src={Fish} alt="Fish" class="h-8 w-8" />
-    </Badge>
-    <Badge variant="secondary" class="flex items-center gap-1">
-      {rawFishCount} <img src={RawFish} alt="Fish" class="h-8 w-8" />
-    </Badge>
     <ConnectButton {walletAdapter} />
   </div>
 </div>

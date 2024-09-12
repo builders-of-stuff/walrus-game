@@ -77,7 +77,6 @@ export const burnWalrus = async (walrusObjectId: string) => {
  * Claims fish from walrus clicking
  */
 export const claimWalrusFish = async (walrusObjectId: string, cb: any) => {
-  console.log('walrusObjectId: ', walrusObjectId);
   const rawFishCount = Number(localStorage.getItem('fishCount')) || 0;
   const tx = new Transaction();
 
@@ -104,6 +103,7 @@ export const claimWalrusFish = async (walrusObjectId: string, cb: any) => {
     cb();
 
     console.log('executedTx: ', executedTx);
+    return executedTx;
   } catch (e) {
     console.log(e);
   }
@@ -136,6 +136,7 @@ export const buyPenguins = async (walrusObjectId: string, penguinQuantity: numbe
     });
 
     console.log('executedTx: ', executedTx);
+    return executedTx;
   } catch (e) {
     console.log(e);
   }
