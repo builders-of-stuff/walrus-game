@@ -33,9 +33,11 @@
   import Penguin from '$lib/assets/penguin-150.png';
 
   /**
-   *  - penguin UI integration
    * - penguin staking calculations
    * - penguin fish claim integration with walrus claim
+   * - Shop UI
+   * - fish sticks
+   * - walrus integration
    *
    */
 
@@ -198,6 +200,24 @@
   });
 
   /**
+   * Penguin painting
+   */
+  $effect(() => {
+    if (!(walrus?.penguins > 0) || walrus?.penguins === paintedPenguins) {
+      return;
+    }
+
+    const penguinsToPaint = Number(walrus?.penguins) - paintedPenguins;
+
+    Array(Number(penguinsToPaint))
+      .fill('snoot snoot')
+      .forEach((_, i) => {
+        paintPenguin(imgWidth, imgHeight, fabricCanvas);
+        paintedPenguins += 1;
+      });
+  });
+
+  /**
    * Fetch existing walrus upon connect
    */
   $effect(() => {
@@ -246,24 +266,6 @@
         paintFire(imgWidth, imgHeight, fabricCanvas, handleClaimWalrusFish);
       })();
     });
-  });
-
-  /**
-   * Penguin painting
-   */
-  $effect(() => {
-    if (!(walrus?.penguins > 0) || walrus?.penguins === paintedPenguins) {
-      return;
-    }
-
-    const penguinsToPaint = Number(walrus?.penguins) - paintedPenguins;
-
-    Array(Number(penguinsToPaint))
-      .fill('snoot snoot')
-      .forEach((_, i) => {
-        paintPenguin(imgWidth, imgHeight, fabricCanvas);
-        paintedPenguins += 1;
-      });
   });
 </script>
 
