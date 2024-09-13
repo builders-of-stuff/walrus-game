@@ -230,7 +230,16 @@ export function paintPenguin(imgWidth, imgHeight, fabricCanvas) {
   /**
    * Penguin
    */
-  const penguinPosition = calculateRelativePosition(100, 100, imgWidth, imgHeight);
+
+  const penguinX = 300 + Math.random() * 100 * 5;
+  const penguinY = 200 + Math.random() * 100 * 4;
+
+  const penguinPosition = calculateRelativePosition(
+    penguinX,
+    penguinY,
+    imgWidth,
+    imgHeight
+  );
 
   fabric.Image.fromURL(Penguin, (img) => {
     // Set image properties

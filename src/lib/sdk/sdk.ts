@@ -112,7 +112,11 @@ export const claimWalrusFish = async (walrusObjectId: string, cb: any) => {
 /**
  * Buy penguin
  */
-export const buyPenguins = async (walrusObjectId: string, penguinQuantity: number) => {
+export const buyPenguins = async (
+  walrusObjectId: string,
+  penguinQuantity: number,
+  cb: any
+) => {
   const tx = new Transaction();
 
   tx.moveCall({
@@ -134,6 +138,8 @@ export const buyPenguins = async (walrusObjectId: string, penguinQuantity: numbe
         showRawInput: true
       }
     });
+
+    cb();
 
     console.log('executedTx: ', executedTx);
     return executedTx;

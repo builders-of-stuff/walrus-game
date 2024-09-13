@@ -33,9 +33,9 @@
   import Penguin from '$lib/assets/penguin-150.png';
 
   /**
-   * - Buy penguin integration
    *  - penguin UI integration
    * - penguin staking calculations
+   * - penguin fish claim integration with walrus claim
    *
    */
 
@@ -48,6 +48,8 @@
   let imgWidth, imgHeight;
 
   let hasCheckedOwnedObjects = $state(false);
+  let isShopOpen = $state(false);
+  let paintedPenguins = $state(0);
 
   let walrus = $state(null as any);
   let fishCount = $state(0);
@@ -56,13 +58,10 @@
   const penguins = $derived(Number(walrus?.penguins) || 0);
   const fishLastClaimedAt = $derived(walrus?.fishLastClaimedAt || 0);
 
-  $effect(() => {
-    console.log('walrus: ', $state.snapshot(walrus));
-  });
-
   const handleBuyPenguins = async (buyQuantity: number = 1) => {
-    await buyPenguins(walrus.id?.id, buyQuantity).then(() => {
+    await buyPenguins(walrus.id?.id, buyQuantity, () => {
       walrus.penguins = Number(walrus?.penguins) + buyQuantity;
+      isShopOpen = false;
     });
   };
 
@@ -104,6 +103,7 @@
     if (walrus) {
       paintWalrus(imgWidth, imgHeight, fabricCanvas, handleWalrusClick);
       paintFire(imgWidth, imgHeight, fabricCanvas, handleClaimWalrusFish);
+      isShopOpen = false;
     }
   };
 
@@ -186,6 +186,10 @@
     };
   });
 
+  $effect(() => {
+    console.log('walrus: ', $state.snapshot(walrus));
+  });
+
   /**
    * Sync rawFishCount with localStorage
    */
@@ -243,24 +247,49 @@
       })();
     });
   });
+
+  /**
+   * Penguin painting
+   */
+  $effect(() => {
+    if (!(walrus?.penguins > 0) || walrus?.penguins === paintedPenguins) {
+      return;
+    }
+
+    const penguinsToPaint = Number(walrus?.penguins) - paintedPenguins;
+
+    Array(Number(penguinsToPaint))
+      .fill('snoot snoot')
+      .forEach((_, i) => {
+        paintPenguin(imgWidth, imgHeight, fabricCanvas);
+        paintedPenguins += 1;
+      });
+  });
 </script>
 
 <div class="mx-2 my-2 flex justify-between">
   <div class="flex gap-1">
-    <Dialog.Root>
+    <Dialog.Root open={isShopOpen}>
+      <!-- Shop -->
       <Dialog.Trigger>
-        <Button>Shop</Button>
+        <Button onclick={() => (isShopOpen = true)}>Shop</Button>
       </Dialog.Trigger>
       <Dialog.Content>
         <Dialog.Header>
           <Dialog.Title>The Walrus Shop</Dialog.Title>
 
           <Button onclick={handleMintWalrus}>Mint walrus</Button>
-          <Button onclick={() => buyPenguins(walrus.id?.id, 1)}>Buy penguin</Button>
+          <Button onclick={() => handleBuyPenguins(1)}>Buy penguin</Button>
+          <Button
+            onclick={() => {
+              isShopOpen = false;
+            }}>Close shop</Button
+          >
         </Dialog.Header>
       </Dialog.Content>
     </Dialog.Root>
 
+    <!-- Penguins -->
     <HoverCard.Root openDelay={200}>
       <HoverCard.Trigger>
         <Badge variant="secondary" class="flex items-center gap-1">
@@ -270,6 +299,7 @@
       <HoverCard.Content>Penguins</HoverCard.Content>
     </HoverCard.Root>
 
+    <!-- Raw fish -->
     <HoverCard.Root openDelay={200}>
       <HoverCard.Trigger>
         <Badge variant="secondary" class="flex items-center gap-1">
@@ -279,6 +309,7 @@
       <HoverCard.Content>Raw fish</HoverCard.Content>
     </HoverCard.Root>
 
+    <!-- Cooked fish -->
     <HoverCard.Root openDelay={200}>
       <HoverCard.Trigger>
         <Badge variant="secondary" class="flex items-center gap-1">
@@ -288,11 +319,11 @@
       <HoverCard.Content>Cooked fish</HoverCard.Content>
     </HoverCard.Root>
 
-    <Button onclick={handleClaimWalrusFish}>Claim walrus fish</Button>
     <Button>Claim penguin fish</Button>
-    <Button onclick={handleBurnWalrus}>Burn walrus</Button>
+    <!-- <Button onclick={handleBurnWalrus}>Burn walrus</Button> -->
   </div>
 
+  <!-- Connect -->
   <div class="flex gap-1">
     <ConnectButton {walletAdapter} />
   </div>
