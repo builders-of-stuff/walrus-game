@@ -9,6 +9,7 @@ use sui::package;
 
 const BASE36: vector<u8> = b"0123456789abcdefghijklmnopqrstuvwxyz";
 
+// Update to this walrus site once deployed
 const VISUALIZATION_SITE: address =
     @0x901fb0569e5054eea1bea1500d1fdfefa8b5cc4def4574c0c99c64b3af24a3ab;
 
@@ -30,23 +31,23 @@ public struct Walrus has key, store {
 
 public struct WALRUS has drop {}
 
-// fun init(otw: WALRUS, ctx: &mut TxContext) {
-//     let publisher = package::claim(otw, ctx);
-//     let mut display = display::new<Walrus>(&publisher, ctx);
+fun init(otw: WALRUS, ctx: &mut TxContext) {
+    let publisher = package::claim(otw, ctx);
+    let mut display = display::new<Walrus>(&publisher, ctx);
 
-//     display.add(
-//         b"link".to_string(),
-//         b"https://{{b36_address}}.walrus.site".to_string(),
-//     );
-//     display.add(
-//         b"walrus site address".to_string(),
-//         VISUALIZATION_SITE.to_string(),
-//     );
-//     display.update_version();
+    display.add(
+        b"link".to_string(),
+        b"https://{{b36_address}}.walrus.site".to_string(),
+    );
+    display.add(
+        b"walrus site address".to_string(),
+        VISUALIZATION_SITE.to_string(),
+    );
+    display.update_version();
 
-//     transfer::public_transfer(publisher, ctx.sender());
-//     transfer::public_transfer(display, ctx.sender());
-// }
+    transfer::public_transfer(publisher, ctx.sender());
+    transfer::public_transfer(display, ctx.sender());
+}
 
 public fun mint(ctx: &mut TxContext): Walrus {
     let walrus = new(ctx);

@@ -6,6 +6,7 @@
     walletAdapter as productionWalletAdapter
   } from '@builders-of-stuff/svelte-sui-wallet-adapter';
   import { onMount, onDestroy, tick, untrack } from 'svelte';
+  import { page } from '$app/stores';
 
   import { PUBLIC_NODE_ENV } from '$env/static/public';
   import { Transaction } from '@mysten/sui/transactions';
@@ -66,7 +67,14 @@
   let penguinRawFishCount = $state(0);
 
   const penguins = $derived(Number(walrus?.penguins) || 0);
-  const fishLastClaimedAt = $derived(walrus?.fishLastClaimedAt || 0);
+  const fishLastClaimedAt = $derived.by(() => {
+    const hasClaimedPenguinFish = Number(walrus?.fish_last_claimed_at) > 0;
+
+    return hasClaimedPenguinFish
+      ? Number(walrus?.fish_last_claimed_at)
+      : Number(localStorage.getItem(`${walrus?.id?.id}-initialPenguinCreatedAt`)) ||
+          null;
+  });
 
   const handleBuyPenguins = async (buyQuantity: number = 1) => {
     await buyPenguins(walrus.id?.id, buyQuantity, () => {
@@ -130,6 +138,16 @@
   /**
    * ===========================================================================================================================
    */
+  $effect(() => {
+    console.log('page: ', $page);
+
+    // const objectId = subdomainToObjectId();
+  });
+
+  $effect(() => {
+    console.log('walrus: ', $state.snapshot(walrus));
+  });
+
   onMount(() => {
     rawFishCount = Number(localStorage.getItem('fishCount')) || 0;
 
@@ -194,10 +212,6 @@
         updateCanvasSize(fabricCanvas, containerDiv)
       );
     };
-  });
-
-  $effect(() => {
-    console.log('walrus: ', $state.snapshot(walrus));
   });
 
   /**
@@ -286,6 +300,24 @@
 
         walrus = object?.data?.content?.fields;
         fishCount = Number(walrus?.fish_count);
+
+        /**
+         * For pre-first time penguin anchoring last claimed time
+         */
+        const hasClaimedPenguinFish = Number(walrus.fish_last_claimed_at) > 0;
+        if (!hasClaimedPenguinFish && Number(walrus.penguins) > 0) {
+          const walrusId = walrus.id?.id;
+          const initialPenguinCreatedAt = localStorage.getItem(
+            `${walrusId}-initialPenguinCreatedAt`
+          );
+
+          if (!initialPenguinCreatedAt) {
+            localStorage.setItem(
+              `${walrusId}-initialPenguinCreatedAt`,
+              Date.now().toString()
+            );
+          }
+        }
 
         paintWalrus(imgWidth, imgHeight, fabricCanvas, handleWalrusClick);
         paintFire(imgWidth, imgHeight, fabricCanvas, handleClaimWalrusFish);

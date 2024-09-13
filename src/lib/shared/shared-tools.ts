@@ -1,4 +1,13 @@
 import { fabric } from 'fabric';
+import { bcs } from '@mysten/sui/bcs';
+import {
+  isValidSuiObjectId,
+  isValidSuiAddress,
+  fromB64,
+  fromHEX,
+  toHEX
+} from '@mysten/sui/utils';
+import baseX from 'base-x';
 
 import Walrus from '$lib/assets/walrus-250.png';
 import Penguin from '$lib/assets/penguin-150.png';
@@ -7,11 +16,31 @@ import Fire from '$lib/assets/fire-40.png';
 
 import { OBJECT_IDS, CANVAS_BG_HEIGHT, CANVAS_BG_WIDTH } from './shared.constant';
 
+const BASE36 = '0123456789abcdefghijklmnopqrstuvwxyz';
+const b36 = baseX(BASE36);
+
 export const getObjectId = (key: string) => {
   return OBJECT_IDS[key];
 };
 
-import {} from './shared.constant';
+export function getSubdomain(hostname: string) {
+  const parts = hostname.split('.');
+  if (parts.length > 2) {
+    return parts[0];
+  }
+  return null;
+}
+
+export function subdomainToObjectId(subdomain: string): string | null {
+  const objectId = '0x' + toHEX(b36.decode(subdomain.toLowerCase()));
+  console.log(
+    'obtained object id: ',
+    objectId,
+    isValidSuiObjectId(objectId),
+    isValidSuiAddress(objectId)
+  );
+  return isValidSuiObjectId(objectId) ? objectId : null;
+}
 
 export function calculateRelativePosition(x, y, imgWidth, imgHeight) {
   return {
