@@ -5,7 +5,7 @@
     testnetWalletAdapter,
     walletAdapter as productionWalletAdapter
   } from '@builders-of-stuff/svelte-sui-wallet-adapter';
-  import { onMount, tick, untrack } from 'svelte';
+  import { onMount, onDestroy, tick, untrack } from 'svelte';
 
   import { PUBLIC_NODE_ENV } from '$env/static/public';
   import { Transaction } from '@mysten/sui/transactions';
@@ -25,6 +25,11 @@
     paintWalrus,
     paintFire
   } from '$lib/shared/shared-tools';
+  import {
+    PENGUIN_PRICE,
+    PENGUIN_FISHING_POWER,
+    FISH_STICK_PRICE
+  } from '$lib/shared/shared.constant';
   import { claimWalrusFish, mintWalrus, burnWalrus, buyPenguins } from '$lib/sdk/sdk';
 
   import Ice from '$lib/assets/ice-1080x720.png';
@@ -50,12 +55,15 @@
   let imgWidth, imgHeight;
 
   let hasCheckedOwnedObjects = $state(false);
+  let hasInitializedPenguinFish = $state(false);
   let isShopOpen = $state(false);
   let paintedPenguins = $state(0);
 
   let walrus = $state(null as any);
   let fishCount = $state(0);
+  // from walrus
   let rawFishCount = $state(0);
+  let penguinRawFishCount = $state(0);
 
   const penguins = $derived(Number(walrus?.penguins) || 0);
   const fishLastClaimedAt = $derived(walrus?.fishLastClaimedAt || 0);
@@ -200,6 +208,21 @@
   });
 
   /**
+   * Passive penguin fishing
+   */
+  $effect(() => {
+    if (!hasInitializedPenguinFish) {
+      const timeDifference = Date.now() - Number(walrus?.fishLastClaimedAt) > 0;
+    }
+
+    const interval = setInterval(() => {
+      penguinRawFishCount += 1;
+    }, 1000);
+
+    return () => clearInterval(interval);
+  });
+
+  /**
    * Penguin painting
    */
   $effect(() => {
@@ -258,6 +281,8 @@
             showStorageRebate: true
           }
         })) as any;
+
+        console.log('object: ', object);
 
         walrus = object?.data?.content?.fields;
         fishCount = Number(walrus?.fish_count);

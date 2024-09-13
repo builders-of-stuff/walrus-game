@@ -12,7 +12,7 @@ const BASE36: vector<u8> = b"0123456789abcdefghijklmnopqrstuvwxyz";
 const VISUALIZATION_SITE: address =
     @0x901fb0569e5054eea1bea1500d1fdfefa8b5cc4def4574c0c99c64b3af24a3ab;
 
-const PENGUIN_PRICE: u64 = 100;
+const PENGUIN_PRICE: u64 = 20;
 
 const PENGUIN_FISHING_POWER: u64 = 10;
 
@@ -75,6 +75,9 @@ entry fun claim_penguin_fish(walrus: &mut Walrus, now: u64, ctx: &mut TxContext)
     walrus.fish_last_claimed_at = now;
 }
 
+/**
+ * Walrus fishing
+*/
 entry fun claim_fish(walrus: &mut Walrus, fish_count: u64, _ctx: &mut TxContext) {
     walrus.fish_count = walrus.fish_count + fish_count;
 }

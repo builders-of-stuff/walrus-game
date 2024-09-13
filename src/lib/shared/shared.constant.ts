@@ -9,3 +9,10 @@ export const OBJECT_IDS = {
 
 export const CANVAS_BG_WIDTH = 1080;
 export const CANVAS_BG_HEIGHT = 720;
+
+// 20 cooked fish
+export const PENGUIN_PRICE = 20;
+// 10 / minute
+export const PENGUIN_FISHING_POWER = 10;
+// 1000 cooked fish
+export const FISH_STICK_PRICE = 1000;

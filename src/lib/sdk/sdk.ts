@@ -41,39 +41,6 @@ export const mintWalrus = async () => {
 };
 
 /**
- * Burn walrus
- */
-export const burnWalrus = async (walrusObjectId: string) => {
-  const tx = new Transaction();
-
-  tx.moveCall({
-    target: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::burn_walrus`,
-    arguments: [tx.object(`${walrusObjectId}`)]
-  });
-
-  try {
-    const { bytes, signature } = await walletAdapter.signTransaction(tx as any, {});
-
-    const executedTx = await walletAdapter.suiClient.executeTransactionBlock({
-      transactionBlock: bytes,
-      signature: signature,
-      options: {
-        showEffects: true,
-        showEvents: true,
-        showObjectChanges: true,
-        showInput: true,
-        showRawInput: true
-      }
-    });
-
-    console.log('executedTx: ', executedTx);
-    return executedTx;
-  } catch (e) {
-    console.log(e);
-  }
-};
-
-/**
  * Claims fish from walrus clicking
  */
 export const claimWalrusFish = async (walrusObjectId: string, cb: any) => {
@@ -140,6 +107,39 @@ export const buyPenguins = async (
     });
 
     cb();
+
+    console.log('executedTx: ', executedTx);
+    return executedTx;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+/**
+ * Burn walrus
+ */
+export const burnWalrus = async (walrusObjectId: string) => {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::burn_walrus`,
+    arguments: [tx.object(`${walrusObjectId}`)]
+  });
+
+  try {
+    const { bytes, signature } = await walletAdapter.signTransaction(tx as any, {});
+
+    const executedTx = await walletAdapter.suiClient.executeTransactionBlock({
+      transactionBlock: bytes,
+      signature: signature,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+        showInput: true,
+        showRawInput: true
+      }
+    });
 
     console.log('executedTx: ', executedTx);
     return executedTx;
