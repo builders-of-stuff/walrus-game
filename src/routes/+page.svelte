@@ -73,6 +73,7 @@
 
   const walrusFishingPower = $derived(Number(walrus?.total_fishing_power) || 0);
   const penguins = $derived(Number(walrus?.penguins) || 0);
+  // e.g 1726326078992
   const fishLastClaimedAt = $derived.by(() => {
     if (!(penguins > 0)) {
       return null;
@@ -88,7 +89,10 @@
 
   const handleBuyPenguins = async (buyQuantity: number = 1) => {
     await buyPenguins(walrus.id?.id, buyQuantity, () => {
+      rawFishCount -= buyQuantity * PENGUIN_PRICE;
       walrus.penguins = Number(walrus?.penguins) + buyQuantity;
+      walrus.total_fishing_power =
+        walrusFishingPower + buyQuantity * PENGUIN_FISHING_POWER;
       isShopOpen = false;
     });
   };
@@ -103,12 +107,12 @@
   const handleClaimAllFish = async () => {
     const now = Date.now();
 
-    if (penguinRawFishCount > 0) {
+    if (penguinRawFishCount > 0 && penguins > 0) {
       await claimAllFish(
         walrus.id?.id,
         rawFishCount,
         now,
-        Number(walrus?.fish_last_claimed_at),
+        fishLastClaimedAt as number,
         () => {
           fishCount += rawFishCount + penguinRawFishCount;
           rawFishCount -= rawFishCount;
@@ -253,7 +257,7 @@
   });
 
   /**
-   * Passive penguin fishing
+   * Set penguinRawFishCount
    */
   $effect(() => {
     if (!fishLastClaimedAt) {
@@ -331,6 +335,11 @@
 
         console.log('object: ', object);
 
+        /**
+         * - Set walrus
+         * - Set fishCount
+         * - Set lastClaimedAt anchor (if needed)
+         */
         walrus = object?.data?.content?.fields;
         fishCount = Number(walrus?.fish_count);
 
@@ -338,7 +347,7 @@
          * For pre-first time penguin anchoring last claimed time
          */
         const hasClaimedPenguinFish = Number(walrus.fish_last_claimed_at) > 0;
-        if (!hasClaimedPenguinFish && Number(walrus.penguins) > 0) {
+        if (!hasClaimedPenguinFish && penguins > 0) {
           const walrusId = walrus.id?.id;
           const initialPenguinCreatedAt = localStorage.getItem(
             `${walrusId}-initialPenguinCreatedAt`
