@@ -56,6 +56,24 @@ public fun mint(ctx: &mut TxContext): Walrus {
     walrus
 }
 
+fun new(ctx: &mut TxContext): Walrus {
+    let id = object::new(ctx);
+    let b36_address = to_b36(id.uid_to_address());
+    let penguins = 0;
+    let total_fishing_power = 0;
+    let fish_last_claimed_at = 0;
+    let fish_count = 0;
+
+    Walrus {
+        id,
+        b36_address,
+        penguins,
+        total_fishing_power,
+        fish_last_claimed_at,
+        fish_count,
+    }
+}
+
 entry fun buy_penguins(walrus: &mut Walrus, penguin_quantity: u64, _ctx: &mut TxContext) {
     assert!(walrus.fish_count >= penguin_quantity * PENGUIN_PRICE, EInsufficientFish);
 
@@ -105,24 +123,6 @@ public fun reset_walrus(walrus: &mut Walrus, _ctx: &mut TxContext) {
     walrus.fish_count = 0;
 }
 
-fun new(ctx: &mut TxContext): Walrus {
-    let id = object::new(ctx);
-    let b36_address = to_b36(id.uid_to_address());
-    let penguins = 0;
-    let total_fishing_power = 0;
-    let fish_last_claimed_at = 0;
-    let fish_count = 0;
-
-    Walrus {
-        id,
-        b36_address,
-        penguins,
-        total_fishing_power,
-        fish_last_claimed_at,
-        fish_count,
-    }
-}
-
 public fun to_b36(addr: address): String {
     let source = address::to_bytes(addr);
     let size = 2 * vector::length(&source);
@@ -160,25 +160,3 @@ public fun to_b36(addr: address): String {
     };
     str.to_string()
 }
-
-
-// public fun calculate_fish(walrus: &mut Walrus, clock: &Clock) {
-//     let current_time = clock::timestamp_ms(clock);
-//     let time_diff = current_time - walrus.last_claim_timestamp;
-    
-//     // Assuming 1 fishing power catches 1 fish per hour
-//     let new_fish = (time_diff * walrus.total_fishing_power) / 3600000; // 3600000 ms in an hour
-    
-//     walrus.fish_count = walrus.fish_count + new_fish;
-//     walrus.last_claim_timestamp = current_time;
-// }
-
-// public fun add_penguin(walrus: &mut Walrus, penguin_power: u64) {
-//     vector::push_back(&mut walrus.penguins, 1);
-//     walrus.total_fishing_power = walrus.total_fishing_power + penguin_power;
-// }
-
-// public fun remove_penguin(walrus: &mut Walrus, penguin_power: u64) {
-//     let _ = vector::pop_back(&mut walrus.penguins);
-//     walrus.total_fishing_power = walrus.total_fishing_power - penguin_power;
-// }
