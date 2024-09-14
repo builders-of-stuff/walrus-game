@@ -31,7 +31,14 @@
     PENGUIN_FISHING_POWER,
     FISH_STICK_PRICE
   } from '$lib/shared/shared.constant';
-  import { claimWalrusFish, mintWalrus, burnWalrus, buyPenguins } from '$lib/sdk/sdk';
+  import {
+    claimWalrusFish,
+    mintWalrus,
+    burnWalrus,
+    buyPenguins,
+    claimAllFish,
+    resetWalrus
+  } from '$lib/sdk/sdk';
 
   import Ice from '$lib/assets/ice-1080x720.png';
   import RawFish from '$lib/assets/fish-32.png';
@@ -39,7 +46,6 @@
   import Penguin from '$lib/assets/penguin-150.png';
 
   /**
-   * - penguin staking calculations
    * - penguin fish claim integration with walrus claim
    * - Shop UI
    * - fish sticks
@@ -94,6 +100,27 @@
     });
   };
 
+  const handleClaimAllFish = async () => {
+    const now = Date.now();
+
+    if (penguinRawFishCount > 0) {
+      await claimAllFish(
+        walrus.id?.id,
+        rawFishCount,
+        now,
+        Number(walrus?.fish_last_claimed_at),
+        () => {
+          fishCount += rawFishCount + penguinRawFishCount;
+          rawFishCount -= rawFishCount;
+          penguinRawFishCount -= penguinRawFishCount;
+          walrus.fish_last_claimed_at = now;
+        }
+      );
+    } else {
+      await handleClaimWalrusFish();
+    }
+  };
+
   const handleMintWalrus = async () => {
     const mintResponse = (await mintWalrus()) as any;
 
@@ -124,7 +151,7 @@
 
     if (walrus) {
       paintWalrus(imgWidth, imgHeight, fabricCanvas, handleWalrusClick);
-      paintFire(imgWidth, imgHeight, fabricCanvas, handleClaimWalrusFish);
+      paintFire(imgWidth, imgHeight, fabricCanvas, handleClaimAllFish);
       isShopOpen = false;
     }
   };
@@ -326,7 +353,7 @@
         }
 
         paintWalrus(imgWidth, imgHeight, fabricCanvas, handleWalrusClick);
-        paintFire(imgWidth, imgHeight, fabricCanvas, handleClaimWalrusFish);
+        paintFire(imgWidth, imgHeight, fabricCanvas, handleClaimAllFish);
       })();
     });
   });
@@ -385,7 +412,8 @@
       <HoverCard.Content>Cooked fish</HoverCard.Content>
     </HoverCard.Root>
 
-    <Button>Claim penguin fish</Button>
+    <!-- <Button>Claim penguin fish</Button> -->
+    <Button onclick={() => resetWalrus(walrus.id?.id)}>Reset walrus</Button>
     <!-- <Button onclick={handleBurnWalrus}>Burn walrus</Button> -->
   </div>
 

@@ -18,7 +18,7 @@ const PENGUIN_PRICE: u64 = 20;
 const PENGUIN_FISHING_POWER: u64 = 10;
 
 const EInsufficientFish: u64 = 0;
-const EFishClaimedTooEarly: u64 = 1;
+// const EFishClaimedTooEarly: u64 = 1;
 
 public struct Walrus has key, store {
     id: UID,
@@ -56,7 +56,7 @@ public fun mint(ctx: &mut TxContext): Walrus {
     walrus
 }
 
-entry fun buy_penguins(walrus: &mut Walrus, penguin_quantity: u64, ctx: &mut TxContext) {
+entry fun buy_penguins(walrus: &mut Walrus, penguin_quantity: u64, _ctx: &mut TxContext) {
     assert!(walrus.fish_count >= penguin_quantity * PENGUIN_PRICE, EInsufficientFish);
 
     walrus.fish_count = walrus.fish_count - penguin_quantity * PENGUIN_PRICE;
@@ -64,8 +64,10 @@ entry fun buy_penguins(walrus: &mut Walrus, penguin_quantity: u64, ctx: &mut TxC
     walrus.total_fishing_power = walrus.total_fishing_power + penguin_quantity * PENGUIN_FISHING_POWER;
 }
 
-entry fun claim_penguin_fish(walrus: &mut Walrus, now: u64, ctx: &mut TxContext) {
-    assert!(now > walrus.fish_last_claimed_at, EFishClaimedTooEarly);
+entry fun claim_penguin_fish(walrus: &mut Walrus, now: u64, anchor_now: u64, _ctx: &mut TxContext) {
+    if (walrus.fish_last_claimed_at == 0) {
+        walrus.fish_last_claimed_at = anchor_now;
+    };
 
     let time_difference = now - walrus.fish_last_claimed_at;
     
@@ -94,6 +96,13 @@ public fun burn_walrus(walrus: Walrus, ctx: &mut TxContext) {
     } = walrus;
 
     object::delete(id);
+}
+
+public fun reset_walrus(walrus: &mut Walrus, _ctx: &mut TxContext) {
+    walrus.penguins = 0;
+    walrus.total_fishing_power = 0;
+    walrus.fish_last_claimed_at = 0;
+    walrus.fish_count = 0;
 }
 
 fun new(ctx: &mut TxContext): Walrus {

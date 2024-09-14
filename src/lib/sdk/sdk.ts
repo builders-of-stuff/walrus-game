@@ -76,6 +76,83 @@ export const claimWalrusFish = async (walrusObjectId: string, cb: any) => {
   }
 };
 
+export const claimAllFish = async (
+  walrusObjectId: string,
+  walrusRawFishCount: number,
+  now: number,
+  fishLastClaimedAt: number,
+  cb: any
+) => {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::claim_fish`,
+    arguments: [tx.object(`${walrusObjectId}`), tx.pure.u64(walrusRawFishCount)]
+  });
+
+  tx.moveCall({
+    target: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::claim_penguin_fish`,
+    arguments: [
+      tx.object(`${walrusObjectId}`),
+      tx.pure.u64(now),
+      tx.pure.u64(fishLastClaimedAt)
+    ]
+  });
+
+  try {
+    const { bytes, signature } = await walletAdapter.signTransaction(tx as any, {});
+
+    const executedTx = await walletAdapter.suiClient.executeTransactionBlock({
+      transactionBlock: bytes,
+      signature: signature,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+        showInput: true,
+        showRawInput: true
+      }
+    });
+
+    cb();
+
+    console.log('executedTx: ', executedTx);
+    return { executedTx, fishLastClaimedAt: now };
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const resetWalrus = async (walrusObjectId: string) => {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::reset_walrus`,
+    arguments: [tx.object(`${walrusObjectId}`)]
+  });
+
+  try {
+    const { bytes, signature } = await walletAdapter.signTransaction(tx as any, {});
+
+    const executedTx = await walletAdapter.suiClient.executeTransactionBlock({
+      transactionBlock: bytes,
+      signature: signature,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+        showInput: true,
+        showRawInput: true
+      }
+    });
+
+    console.log('executedTx: ', executedTx);
+    return executedTx;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 /**
  * Buy penguin
  */
