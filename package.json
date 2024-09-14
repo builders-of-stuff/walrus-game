@@ -45,6 +45,7 @@
     "bits-ui": "^0.21.13",
     "clsx": "^2.1.1",
     "fabric": "5.4.0",
+    "lucide-svelte": "^0.441.0",
     "svelte-radix": "^1.1.1",
     "tailwind-merge": "^2.5.2",
     "tailwind-variants": "^0.2.1"

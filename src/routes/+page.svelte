@@ -5,9 +5,10 @@
     testnetWalletAdapter,
     walletAdapter as productionWalletAdapter
   } from '@builders-of-stuff/svelte-sui-wallet-adapter';
+  import { Plus, Minus, ShoppingCart } from 'lucide-svelte';
   import { onMount, onDestroy, tick, untrack } from 'svelte';
-  import { page } from '$app/stores';
 
+  import { page } from '$app/stores';
   import { PUBLIC_NODE_ENV } from '$env/static/public';
   import { Transaction } from '@mysten/sui/transactions';
 
@@ -15,6 +16,7 @@
   import { Badge } from '$lib/components/ui/badge';
   import * as Dialog from '$lib/components/ui/dialog';
   import * as HoverCard from '$lib/components/ui/hover-card';
+  import { Input } from '$lib/components/ui/input';
 
   import {
     paintPenguin,
@@ -46,11 +48,11 @@
   import Penguin from '$lib/assets/penguin-150.png';
 
   /**
-   * - penguin fish claim integration with walrus claim
+   * - reset walrus
    * - Shop UI
-   * - fish sticks
-   * - walrus integration
-   *
+   * - walrus game walrus fetching integration
+   * - deploy
+   * - video
    */
 
   const walletAdapter =
@@ -64,6 +66,7 @@
   let hasCheckedOwnedObjects = $state(false);
   let isShopOpen = $state(false);
   let paintedPenguins = $state(0);
+  let penguinBuyQuantity = $state(1);
 
   let walrus = $state(null as any);
   let fishCount = $state(0);
@@ -86,6 +89,7 @@
       : Number(localStorage.getItem(`${walrus?.id?.id}-initialPenguinCreatedAt`)) ||
           null;
   });
+  const penguinBuyCost = $derived(Number(penguinBuyQuantity) * PENGUIN_PRICE);
 
   const handleBuyPenguins = async (buyQuantity: number = 1) => {
     await buyPenguins(walrus.id?.id, buyQuantity, () => {
@@ -370,8 +374,8 @@
 
 <div class="mx-2 my-2 flex justify-between">
   <div class="flex gap-1">
-    <Dialog.Root open={isShopOpen}>
-      <!-- Shop -->
+    <!-- Shop -->
+    <!-- <Dialog.Root open={isShopOpen}>
       <Dialog.Trigger>
         <Button onclick={() => (isShopOpen = true)}>Shop</Button>
       </Dialog.Trigger>
@@ -387,6 +391,56 @@
             }}>Close shop</Button
           >
         </Dialog.Header>
+      </Dialog.Content>
+    </Dialog.Root> -->
+
+    <Dialog.Root bind:open={isShopOpen}>
+      <Dialog.Trigger>
+        <Button class="flex items-center gap-2">
+          <ShoppingCart size={18} />
+          Shop
+        </Button>
+      </Dialog.Trigger>
+      <Dialog.Content class="sm:max-w-[425px]">
+        <Dialog.Header>
+          <Dialog.Title class="mb-4 text-center text-2xl font-bold"
+            >The Walrus Shop</Dialog.Title
+          >
+        </Dialog.Header>
+        <div class="grid gap-4">
+          <div class="grid grid-cols-2 gap-4">
+            <Button
+              variant="outline"
+              class="flex h-24 flex-col items-center justify-center"
+              onclick={handleMintWalrus}
+            >
+              <img src="/path-to-walrus-icon.png" alt="Walrus" class="mb-2 h-12 w-12" />
+              Mint Walrus
+            </Button>
+            <div
+              class="flex h-24 flex-col items-center justify-center rounded-md border p-2"
+            >
+              <img src={Penguin} alt="Penguin" class="mb-2 h-12 w-12" />
+              <div class="flex items-center">
+                <Input
+                  type="number"
+                  min="1"
+                  class="mx-2 w-14 text-center"
+                  bind:value={penguinBuyQuantity}
+                />
+              </div>
+            </div>
+          </div>
+          <Button class="w-full" onclick={() => handleBuyPenguins(penguinBuyQuantity)}>
+            Buy {penguinBuyQuantity} Penguin{penguinBuyQuantity > 1 ? 's' : ''} for {penguinBuyCost}
+            cooked fish
+          </Button>
+        </div>
+        <Dialog.Footer class="mt-4">
+          <Button variant="outline" onclick={() => (isShopOpen = false)}
+            >Close Shop</Button
+          >
+        </Dialog.Footer>
       </Dialog.Content>
     </Dialog.Root>
 
