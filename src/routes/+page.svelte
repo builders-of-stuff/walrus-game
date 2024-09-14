@@ -56,7 +56,6 @@
   let imgWidth, imgHeight;
 
   let hasCheckedOwnedObjects = $state(false);
-  let hasInitializedPenguinFish = $state(false);
   let isShopOpen = $state(false);
   let paintedPenguins = $state(0);
 
@@ -66,8 +65,13 @@
   let rawFishCount = $state(0);
   let penguinRawFishCount = $state(0);
 
+  const walrusFishingPower = $derived(Number(walrus?.total_fishing_power) || 0);
   const penguins = $derived(Number(walrus?.penguins) || 0);
   const fishLastClaimedAt = $derived.by(() => {
+    if (!(penguins > 0)) {
+      return null;
+    }
+
     const hasClaimedPenguinFish = Number(walrus?.fish_last_claimed_at) > 0;
 
     return hasClaimedPenguinFish
@@ -225,12 +229,14 @@
    * Passive penguin fishing
    */
   $effect(() => {
-    if (!hasInitializedPenguinFish) {
-      const timeDifference = Date.now() - Number(walrus?.fishLastClaimedAt) > 0;
+    if (!fishLastClaimedAt) {
+      return;
     }
 
     const interval = setInterval(() => {
-      penguinRawFishCount += 1;
+      const timeDifference = Date.now() - Number(fishLastClaimedAt);
+
+      penguinRawFishCount = Math.round((timeDifference * walrusFishingPower) / 60000);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -362,7 +368,8 @@
     <HoverCard.Root openDelay={200}>
       <HoverCard.Trigger>
         <Badge variant="secondary" class="flex items-center gap-1">
-          {rawFishCount} <img src={RawFish} alt="Fish" class="h-8 w-8" />
+          {rawFishCount + penguinRawFishCount}
+          <img src={RawFish} alt="Fish" class="h-8 w-8" />
         </Badge>
       </HoverCard.Trigger>
       <HoverCard.Content>Raw fish</HoverCard.Content>
