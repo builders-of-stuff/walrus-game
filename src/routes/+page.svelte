@@ -76,6 +76,8 @@
 
   const walrusFishingPower = $derived(Number(walrus?.total_fishing_power) || 0);
   const penguins = $derived(Number(walrus?.penguins) || 0);
+  const penguinBuyCost = $derived(Number(penguinBuyQuantity) * PENGUIN_PRICE);
+  const canBuyPenguins = $derived(fishCount >= penguinBuyCost);
   // e.g 1726326078992
   const fishLastClaimedAt = $derived.by(() => {
     if (!(penguins > 0)) {
@@ -89,11 +91,24 @@
       : Number(localStorage.getItem(`${walrus?.id?.id}-initialPenguinCreatedAt`)) ||
           null;
   });
-  const penguinBuyCost = $derived(Number(penguinBuyQuantity) * PENGUIN_PRICE);
 
   const handleBuyPenguins = async (buyQuantity: number = 1) => {
     await buyPenguins(walrus.id?.id, buyQuantity, () => {
-      rawFishCount -= buyQuantity * PENGUIN_PRICE;
+      if (!(penguins > 0)) {
+        const walrusId = walrus.id?.id;
+        const initialPenguinCreatedAt = localStorage.getItem(
+          `${walrusId}-initialPenguinCreatedAt`
+        );
+
+        if (!initialPenguinCreatedAt) {
+          localStorage.setItem(
+            `${walrusId}-initialPenguinCreatedAt`,
+            Date.now().toString()
+          );
+        }
+      }
+
+      fishCount -= buyQuantity * PENGUIN_PRICE;
       walrus.penguins = Number(walrus?.penguins) + buyQuantity;
       walrus.total_fishing_power =
         walrusFishingPower + buyQuantity * PENGUIN_FISHING_POWER;
@@ -431,7 +446,11 @@
               </div>
             </div>
           </div>
-          <Button class="w-full" onclick={() => handleBuyPenguins(penguinBuyQuantity)}>
+          <Button
+            disabled={!canBuyPenguins}
+            class="w-full"
+            onclick={() => handleBuyPenguins(penguinBuyQuantity)}
+          >
             Buy {penguinBuyQuantity} Penguin{penguinBuyQuantity > 1 ? 's' : ''} for {penguinBuyCost}
             cooked fish
           </Button>
