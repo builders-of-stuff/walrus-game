@@ -5,12 +5,11 @@
     testnetWalletAdapter,
     walletAdapter as productionWalletAdapter
   } from '@builders-of-stuff/svelte-sui-wallet-adapter';
-  import { Plus, Minus, ShoppingCart } from 'lucide-svelte';
-  import { onMount, onDestroy, tick, untrack } from 'svelte';
+  import { ShoppingCart } from 'lucide-svelte';
+  import { onMount, untrack } from 'svelte';
 
   import { page } from '$app/stores';
   import { PUBLIC_NODE_ENV } from '$env/static/public';
-  import { Transaction } from '@mysten/sui/transactions';
 
   import { Button } from '$lib/components/ui/button';
   import { Badge } from '$lib/components/ui/badge';
@@ -48,8 +47,6 @@
   import Penguin from '$lib/assets/penguin-150.png';
 
   /**
-   * - reset walrus
-   * - Shop UI
    * - walrus game walrus fetching integration
    * - deploy
    * - video
@@ -310,6 +307,8 @@
       });
   });
 
+  const isAdminMode = localStorage.getItem('isAdminMode') === 'true';
+
   /**
    * Fetch existing walrus upon connect
    */
@@ -390,24 +389,6 @@
 <div class="mx-2 my-2 flex justify-between">
   <div class="flex gap-1">
     <!-- Shop -->
-    <!-- <Dialog.Root open={isShopOpen}>
-      <Dialog.Trigger>
-        <Button onclick={() => (isShopOpen = true)}>Shop</Button>
-      </Dialog.Trigger>
-      <Dialog.Content>
-        <Dialog.Header>
-          <Dialog.Title>The Walrus Shop</Dialog.Title>
-
-          <Button onclick={handleMintWalrus}>Mint walrus</Button>
-          <Button onclick={() => handleBuyPenguins(1)}>Buy penguin</Button>
-          <Button
-            onclick={() => {
-              isShopOpen = false;
-            }}>Close shop</Button
-          >
-        </Dialog.Header>
-      </Dialog.Content>
-    </Dialog.Root> -->
 
     <Dialog.Root bind:open={isShopOpen}>
       <Dialog.Trigger>
@@ -423,15 +404,21 @@
           >
         </Dialog.Header>
         <div class="grid gap-4">
-          <div class="grid grid-cols-2 gap-4">
-            <Button
-              variant="outline"
-              class="flex h-24 flex-col items-center justify-center"
-              onclick={handleMintWalrus}
-            >
-              <img src="/path-to-walrus-icon.png" alt="Walrus" class="mb-2 h-12 w-12" />
-              Mint Walrus
-            </Button>
+          <div class="grid grid-cols-1 gap-4">
+            {#if isAdminMode}
+              <Button
+                variant="outline"
+                class="flex h-24 flex-col items-center justify-center"
+                onclick={handleMintWalrus}
+              >
+                <img
+                  src="/path-to-walrus-icon.png"
+                  alt="Walrus"
+                  class="mb-2 h-12 w-12"
+                />
+                Mint Walrus
+              </Button>
+            {/if}
             <div
               class="flex h-24 flex-col items-center justify-center rounded-md border p-2"
             >
@@ -463,16 +450,6 @@
       </Dialog.Content>
     </Dialog.Root>
 
-    <!-- Penguins -->
-    <HoverCard.Root openDelay={200}>
-      <HoverCard.Trigger>
-        <Badge variant="secondary" class="flex items-center gap-1">
-          {penguins} <img src={Penguin} alt="Fish" class="h-8 w-8" />
-        </Badge>
-      </HoverCard.Trigger>
-      <HoverCard.Content>Penguins</HoverCard.Content>
-    </HoverCard.Root>
-
     <!-- Raw fish -->
     <HoverCard.Root openDelay={200}>
       <HoverCard.Trigger>
@@ -494,9 +471,21 @@
       <HoverCard.Content>Cooked fish</HoverCard.Content>
     </HoverCard.Root>
 
-    <!-- <Button>Claim penguin fish</Button> -->
-    <Button onclick={() => resetWalrus(walrus.id?.id)}>Reset walrus</Button>
-    <!-- <Button onclick={handleBurnWalrus}>Burn walrus</Button> -->
+    <!-- Penguins -->
+    <HoverCard.Root openDelay={200}>
+      <HoverCard.Trigger>
+        <Badge variant="secondary" class="flex items-center gap-1">
+          {penguins} <img src={Penguin} alt="Fish" class="h-8 w-8" />
+        </Badge>
+      </HoverCard.Trigger>
+      <HoverCard.Content>Penguins</HoverCard.Content>
+    </HoverCard.Root>
+
+    <!-- Admin stuff -->
+    {#if isAdminMode}
+      <Button onclick={() => resetWalrus(walrus.id?.id)}>Reset walrus</Button>
+      <Button onclick={handleBurnWalrus}>Burn walrus</Button>
+    {/if}
   </div>
 
   <!-- Connect -->
