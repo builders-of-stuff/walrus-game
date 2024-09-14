@@ -42,6 +42,7 @@
   "dependencies": {
     "@builders-of-stuff/svelte-sui-wallet-adapter": "^1.1.0",
     "@mysten/sui": "1.9.0",
+    "@sveltejs/adapter-static": "^3.0.4",
     "bits-ui": "^0.21.13",
     "clsx": "^2.1.1",
     "fabric": "5.4.0",

@@ -11,7 +11,7 @@ const BASE36: vector<u8> = b"0123456789abcdefghijklmnopqrstuvwxyz";
 
 // Update to this walrus site once deployed
 const VISUALIZATION_SITE: address =
-    @0x901fb0569e5054eea1bea1500d1fdfefa8b5cc4def4574c0c99c64b3af24a3ab;
+    @0xab25a686b8dcff5614d681c6d7619ecabaa350b4cf39d583cf2b675593c090b7;
 
 const PENGUIN_PRICE: u64 = 20;
 

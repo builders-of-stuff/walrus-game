@@ -25,13 +25,11 @@
     updateCanvasSize,
     getObjectId,
     paintWalrus,
-    paintFire
+    paintFire,
+    subdomainToObjectId,
+    getSubdomain
   } from '$lib/shared/shared-tools';
-  import {
-    PENGUIN_PRICE,
-    PENGUIN_FISHING_POWER,
-    FISH_STICK_PRICE
-  } from '$lib/shared/shared.constant';
+  import { PENGUIN_PRICE, PENGUIN_FISHING_POWER } from '$lib/shared/shared.constant';
   import {
     claimWalrusFish,
     mintWalrus,
@@ -313,28 +311,41 @@
    * Fetch existing walrus upon connect
    */
   $effect(() => {
-    if (!walletAdapter.isConnected || !!walrus?.id || hasCheckedOwnedObjects) {
+    // if (!walletAdapter.isConnected || !!walrus?.id || hasCheckedOwnedObjects) {
+    //   return;
+    // }
+
+    if (!!walrus?.id) {
       return;
     }
 
     untrack(() => {
       (async () => {
-        const ownedObjects = await walletAdapter.suiClient.getOwnedObjects({
-          owner: walletAdapter?.currentAccount?.address as any,
-          filter: {
-            StructType: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::Walrus`
-          },
-          options: {
-            showContent: true,
-            showDisplay: true,
-            showOwner: true,
-            showType: true,
-            showStorageRebate: true
-          }
-        });
+        // const ownedObjects = await walletAdapter.suiClient.getOwnedObjects({
+        //   owner: walletAdapter?.currentAccount?.address as any,
+        //   filter: {
+        //     StructType: `${getObjectId('WALRUS_GAME_PACKAGE')}::walrus::Walrus`
+        //   },
+        //   options: {
+        //     showContent: true,
+        //     showDisplay: true,
+        //     showOwner: true,
+        //     showType: true,
+        //     showStorageRebate: true
+        //   }
+        // });
 
-        const walrusId = ownedObjects?.data?.[0]?.data?.objectId;
-        hasCheckedOwnedObjects = true;
+        // const walrusId = ownedObjects?.data?.[0]?.data?.objectId;
+        // hasCheckedOwnedObjects = true;
+
+        const walrusId = subdomainToObjectId(getSubdomain($page.url.hostname) as any);
+
+        console.log('$page.url: ', $page.url);
+        console.log('walrusId: ', walrusId);
+        console.log(
+          'getSubdomain($page.url.hostname): ',
+          getSubdomain($page.url.hostname)
+        );
 
         if (!walrusId) {
           return;
