@@ -115,7 +115,11 @@ export function moveCanvas(x, y, fabricCanvas, imgWidth, imgHeight) {
 export function paintWalrus(imgWidth, imgHeight, fabricCanvas, clickCallback) {
   const walrusPosition = calculateRelativePosition(100, 200, imgWidth, imgHeight);
 
+  console.log('walrusPosition: ', walrusPosition);
+
   fabric.Image.fromURL(Walrus, (img) => {
+    console.log('walrusimg: ', img);
+
     // Set image properties
     img.set({
       left: walrusPosition.left,

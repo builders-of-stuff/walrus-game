@@ -1,13 +1,9 @@
 import { PUBLIC_NODE_ENV } from '$env/static/public';
 import { getObjectId } from '$lib/shared/shared-tools';
-import {
-  testnetWalletAdapter,
-  walletAdapter as productionWalletAdapter
-} from '@builders-of-stuff/svelte-sui-wallet-adapter';
+import { testnetWalletAdapter } from '@builders-of-stuff/svelte-sui-wallet-adapter';
 import { Transaction } from '@mysten/sui/transactions';
 
-const walletAdapter =
-  PUBLIC_NODE_ENV === 'production' ? productionWalletAdapter : testnetWalletAdapter;
+const walletAdapter = testnetWalletAdapter;
 
 /**
  * Mint walrus

@@ -2,8 +2,7 @@
   import { fabric } from 'fabric';
   import {
     ConnectButton,
-    testnetWalletAdapter,
-    walletAdapter as productionWalletAdapter
+    testnetWalletAdapter
   } from '@builders-of-stuff/svelte-sui-wallet-adapter';
   import { ShoppingCart } from 'lucide-svelte';
   import { onMount, untrack } from 'svelte';
@@ -50,14 +49,14 @@
    * - video
    */
 
-  const walletAdapter =
-    PUBLIC_NODE_ENV === 'production' ? productionWalletAdapter : testnetWalletAdapter;
+  const walletAdapter = testnetWalletAdapter;
 
   let canvas;
   let fabricCanvas;
   let containerDiv;
   let imgWidth, imgHeight;
 
+  let hasMounted = $state(false);
   let hasCheckedOwnedObjects = $state(false);
   let isShopOpen = $state(false);
   let paintedPenguins = $state(0);
@@ -225,6 +224,14 @@
         (fabricCanvas.height / img.height) * 1
       );
 
+      console.log('---');
+      console.log('fabricCanvas: ', fabricCanvas);
+      console.log('fabricCanvas.width: ', fabricCanvas.width);
+      console.log('img: ', img);
+      console.log('img.width: ', img.width);
+      console.log('scaleFactor: ', scaleFactor);
+      console.log('---');
+
       imgWidth = img.width * scaleFactor;
       imgHeight = img.height * scaleFactor;
 
@@ -239,6 +246,7 @@
         (fabricCanvas.height - img.height * scaleFactor) / 2;
 
       fabricCanvas.renderAll();
+      hasMounted = true;
     });
 
     /**
@@ -311,13 +319,16 @@
    * Fetch existing walrus upon connect
    */
   $effect(() => {
+    const walrusId = subdomainToObjectId(getSubdomain($page.url.hostname) as any);
+
     // if (!walletAdapter.isConnected || !!walrus?.id || hasCheckedOwnedObjects) {
     //   return;
     // }
 
-    if (!!walrus?.id) {
+    if (!walrusId || !!walrus?.id || hasCheckedOwnedObjects || !hasMounted) {
       return;
     }
+    console.log('hasMounted: ', hasMounted);
 
     untrack(() => {
       (async () => {
@@ -372,6 +383,8 @@
         walrus = object?.data?.content?.fields;
         fishCount = Number(walrus?.fish_count);
 
+        hasCheckedOwnedObjects = true;
+
         /**
          * For pre-first time penguin anchoring last claimed time
          */
@@ -390,6 +403,8 @@
           }
         }
 
+        console.log('imgWidth: ', imgWidth);
+        console.log('imgHeight: ', imgHeight);
         paintWalrus(imgWidth, imgHeight, fabricCanvas, handleWalrusClick);
         paintFire(imgWidth, imgHeight, fabricCanvas, handleClaimAllFish);
       })();
@@ -450,7 +465,8 @@
             onclick={() => handleBuyPenguins(penguinBuyQuantity)}
           >
             Buy {penguinBuyQuantity} Penguin{penguinBuyQuantity > 1 ? 's' : ''} for {penguinBuyCost}
-            cooked fish
+            <img src={Fish} alt="fishstick" class="h-12 w-12" />
+            (cooked fish)
           </Button>
         </div>
         <Dialog.Footer class="mt-4">
