@@ -1,38 +1,11 @@
-# create-svelte
+# Walrus game
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+A little game about walruses, fish, and penguins.
 
-## Creating a project
+Sites are hosted using Walrus as a decentralized store. Each minted walrus NFT comes with its own unique site thanks to Walrus redirects.
 
-If you're seeing this, you've probably already done this step. Congrats!
+Available on Sui testnet at https://27cq3tlycwm5nihei6oxv6pbo2c1z5dpv6y67e7ux6swvwgra8.walrus.site/
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+Minting site repo: https://github.com/builders-of-stuff/walrus-game-mint
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+Video demo: https://youtu.be/CTJWYDa5LxQ
