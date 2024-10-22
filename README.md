@@ -11,3 +11,13 @@ Available on Sui testnet at https://27cq3tlycwm5nihei6oxv6pbo2c1z5dpv6y67e7ux6sw
 Minting site repo: https://github.com/builders-of-stuff/walrus-game-mint
 
 Video demo: https://youtu.be/CTJWYDa5LxQ
+
+# How to deploy
+
+1. Update & build walrus-sites repo
+2. Build this repo's static files
+3. Deploy static files as walrus-site
+4. Update this repo's `.move` with the new package ID
+5. Deploy smart contracts
+6. Update `shared.constant` & update walrus-site
+7. Deploy mint site as walrus site
