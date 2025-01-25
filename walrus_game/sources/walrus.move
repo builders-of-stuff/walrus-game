@@ -4,7 +4,8 @@ use std::string::String;
 use sui::address;
 use sui::display;
 use sui::package;
-// use sui::random::{Random, RandomGenerator}; 
+
+// use sui::random::{Random, RandomGenerator};
 // use sui::object_bag::{Self, ObjectBag};
 
 const BASE36: vector<u8> = b"0123456789abcdefghijklmnopqrstuvwxyz";
@@ -23,7 +24,7 @@ const EInsufficientFish: u64 = 0;
 public struct Walrus has key, store {
     id: UID,
     b36_address: String,
-    penguins: u64, 
+    penguins: u64,
     total_fishing_power: u64,
     fish_last_claimed_at: u64,
     fish_count: u64,
@@ -74,24 +75,34 @@ fun new(ctx: &mut TxContext): Walrus {
     }
 }
 
-entry fun buy_penguins(walrus: &mut Walrus, penguin_quantity: u64, _ctx: &mut TxContext) {
+entry fun buy_penguins(
+    walrus: &mut Walrus,
+    penguin_quantity: u64,
+    _ctx: &mut TxContext,
+) {
     assert!(walrus.fish_count >= penguin_quantity * PENGUIN_PRICE, EInsufficientFish);
 
     walrus.fish_count = walrus.fish_count - penguin_quantity * PENGUIN_PRICE;
     walrus.penguins = walrus.penguins + penguin_quantity;
-    walrus.total_fishing_power = walrus.total_fishing_power + penguin_quantity * PENGUIN_FISHING_POWER;
+    walrus.total_fishing_power =
+        walrus.total_fishing_power + penguin_quantity * PENGUIN_FISHING_POWER;
 }
 
-entry fun claim_penguin_fish(walrus: &mut Walrus, now: u64, anchor_now: u64, _ctx: &mut TxContext) {
+entry fun claim_penguin_fish(
+    walrus: &mut Walrus,
+    now: u64,
+    anchor_now: u64,
+    _ctx: &mut TxContext,
+) {
     if (walrus.fish_last_claimed_at == 0) {
         walrus.fish_last_claimed_at = anchor_now;
     };
 
     let time_difference = now - walrus.fish_last_claimed_at;
-    
+
     // Assuming 1 fishing power catches 1 fish per minute
     let new_fish = (time_difference * walrus.total_fishing_power) / 60000; // 60000 ms in a minute
-    
+
     walrus.fish_count = walrus.fish_count + new_fish;
     walrus.fish_last_claimed_at = now;
 }
@@ -105,7 +116,7 @@ entry fun claim_fish(walrus: &mut Walrus, fish_count: u64, _ctx: &mut TxContext)
 
 public fun burn_walrus(walrus: Walrus, ctx: &mut TxContext) {
     let Walrus {
-        id, 
+        id,
         b36_address: _,
         penguins: _,
         total_fishing_power: _,
