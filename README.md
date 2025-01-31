@@ -6,7 +6,7 @@ Click walrus to catch fish, buy penguins with fish, penguins catch fish automati
 
 Sites are hosted using Walrus as a decentralized store. Each minted walrus NFT comes with its own unique site thanks to Walrus redirects.
 
-Available on Sui testnet at [https://6611bjx7yql93gjq2fjwvfapc6ihc3j070lgrbol8ewiliw4w2.walrus.site](https://4j5tbcmxs58v45u0w927p2vzmed5zfhnbrhe29oz699h8872iy.walrus.site)
+Available on Sui testnet at [https://buildersofstuff.walrus.site](https://buildersofstuff.walrus.site)
 
 Minting site repo: https://github.com/builders-of-stuff/walrus-game-mint
 
